@@ -7,9 +7,9 @@
 ## 2. 目标跟踪
 ### (1) bytetrack
 bytetrack算法的代码注释以及理解
-### 3. Real-ESRGAN
+## 3. Real-ESRGAN
 Real-ESRGAN训练代码理解，代码改动。
-### 4. auto lable with SAM
+## 4. auto lable with SAM
 使用SAM进行半自动标注
 # 二、部署
 ## 1. TensorRT
