@@ -1,0 +1,55 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="41">
+            <item index="0" class="java.lang.String" itemvalue="scikit-image" />
+            <item index="1" class="java.lang.String" itemvalue="scipy" />
+            <item index="2" class="java.lang.String" itemvalue="matplotlib" />
+            <item index="3" class="java.lang.String" itemvalue="pillow" />
+            <item index="4" class="java.lang.String" itemvalue="torch" />
+            <item index="5" class="java.lang.String" itemvalue="numpy" />
+            <item index="6" class="java.lang.String" itemvalue="urllib3" />
+            <item index="7" class="java.lang.String" itemvalue="torchvision" />
+            <item index="8" class="java.lang.String" itemvalue="thop" />
+            <item index="9" class="java.lang.String" itemvalue="opencv-python" />
+            <item index="10" class="java.lang.String" itemvalue="PyYAML" />
+            <item index="11" class="java.lang.String" itemvalue="ipython" />
+            <item index="12" class="java.lang.String" itemvalue="requests" />
+            <item index="13" class="java.lang.String" itemvalue="psutil" />
+            <item index="14" class="java.lang.String" itemvalue="tqdm" />
+            <item index="15" class="java.lang.String" itemvalue="pandas" />
+            <item index="16" class="java.lang.String" itemvalue="tensorboard" />
+            <item index="17" class="java.lang.String" itemvalue="seaborn" />
+            <item index="18" class="java.lang.String" itemvalue="gitpython" />
+            <item index="19" class="java.lang.String" itemvalue="Pillow" />
+            <item index="20" class="java.lang.String" itemvalue="opencv-contrib-python" />
+            <item index="21" class="java.lang.String" itemvalue="PyMuPDF" />
+            <item index="22" class="java.lang.String" itemvalue="lanms-neo" />
+            <item index="23" class="java.lang.String" itemvalue="rapidfuzz" />
+            <item index="24" class="java.lang.String" itemvalue="pyclipper" />
+            <item index="25" class="java.lang.String" itemvalue="attrdict" />
+            <item index="26" class="java.lang.String" itemvalue="imgaug" />
+            <item index="27" class="java.lang.String" itemvalue="lmdb" />
+            <item index="28" class="java.lang.String" itemvalue="Polygon3" />
+            <item index="29" class="java.lang.String" itemvalue="premailer" />
+            <item index="30" class="java.lang.String" itemvalue="lxml" />
+            <item index="31" class="java.lang.String" itemvalue="visualdl" />
+            <item index="32" class="java.lang.String" itemvalue="openpyxl" />
+            <item index="33" class="java.lang.String" itemvalue="terminado" />
+            <item index="34" class="java.lang.String" itemvalue="python" />
+            <item index="35" class="java.lang.String" itemvalue="spacy" />
+            <item index="36" class="java.lang.String" itemvalue="tensorflow" />
+            <item index="37" class="java.lang.String" itemvalue="msgpack-numpy" />
+            <item index="38" class="java.lang.String" itemvalue="pytorch" />
+            <item index="39" class="java.lang.String" itemvalue="dill" />
+            <item index="40" class="java.lang.String" itemvalue="msgpack-python" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
