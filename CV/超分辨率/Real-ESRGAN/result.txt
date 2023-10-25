@@ -1,0 +1,4 @@
+16张530*400分辨率，长和宽各放大4倍，Telse T4，无TensorRT加速，模型RealESRGAN_x4plus.pth平均一张图推理时间1132ms，模型RealESRGAN_x2plus.pth平均一张图推理时间278ms
+16张200*200分辨率，长和宽各放大4倍，Telse T4，无TensorRT加速，模型RealESRGAN_x4plus.pth平均一张图推理时间191ms，模型RealESRGAN_x2plus.pth平均一张图推理时间52ms
+
+

@@ -1,0 +1,17 @@
+生成meta_info:
+python scripts/generate_meta_info.py --input datasets/landsea/train/hr --root datasets/landsea/train --meta_info datasets/landsea/meta_info/meta_info_landsea.txt
+python scripts/generate_meta_info_pairdata.py --input datasets/landsea/train/hr datasets/landsea/train/lr --meta_info datasets/landsea/meta_info/meta_info_landsea.txt
+单卡训练：
+python train.py -opt ../options/finetune_realesrgan_x4plus_pairdata.yml --auto_resume
+python train.py -opt ../options/finetune_realesrnet_x4plus.yml --auto_resume
+多卡训练：
+CUDA_VISIBLE_DEVICES=0,1 \
+python -m torch.distributed.launch --nproc_per_node=2 --master_port=21 train.py -opt ../options/finetune_realesrgan_x4plus_pairdata.yml --launcher pytorch --auto_resume
+CUDA_VISIBLE_DEVICES=0,1 \
+python -m torch.distributed.launch --nproc_per_node=2 --master_port=21 train.py -opt ../options/finetune_realesrnet_x4plus.yml --launcher pytorch --auto_resume
+CUDA_VISIBLE_DEVICES=0,1 \
+python -m torch.distributed.launch --nproc_per_node=2 --master_port=21 train.py -opt ../options/finetune_realesrgan_x4plus.yml --launcher pytorch --auto_resume
+
+疑惑：
+1. 训练real-ESRGAN pairdata时效果越来越好，但是验证集上的psnr值却在略微下降
+2. 训练real-ESRNet时效果越来越好，l_pix损失却几乎不变

@@ -1,0 +1,18 @@
+在basicsr中的train.py中的第71行改为：state_path = osp.join(opt['root_path'], 'experiments', opt['name'], 'training_states')
+在basicsr中的utils中的logger.py: 90-118行使用下面这段②代替
+在basicsr中的train.py中的第154-155之间增加（为了在训练之前先使用验证集看一下模型的效果）：
+for val_loader in val_loaders:
+    model.validation(val_loader, current_iter, tb_logger, opt['val']['save_img'])
+在basicsr中的utils中options.py第88行，从--local_rank修改为--local-rank（为了多gpu分布式训练，作者这块写错了）
+在basicsr中的models中sr_model.py的第185那一段改成下面①：并在最上面import os import cv2
+在basicsr中的models中sr_model.py的第213行改成log_str += f'\t # {metric}: {value:.4f} @ {current_iter} iter'（记录bad_cases）
+=========================================①=========================================
+if with_metrics:
+    # calculate metrics
+    bad_case_save_path = save_img_path.replace("visualization", 'bad_cases')
+    for name, opt_ in self.opt['val']['metrics'].items():
+        metric_value = calculate_metric(metric_data, opt_)
+        self.metric_results[name] += metric_value
+        if metric_value < 15:
+            imwrite(sr_img, bad_case_save_path)
+

@@ -1,0 +1,197 @@
+# 每次训练checkpoint的保存的文件夹的名字
+# name: train_模型名称_数据集描述_数据集中是否有大量重复数据_权重文件是基于上一轮的什么训练_基于哪个权重文件_本轮更改了哪个超参数
+name: finetune_RealESRNetx4plus_subTimeRegionWithPsnr18Mixed_DupulicateYes_BaseOnpsnr20_psnr20iter4k.pth_twoGPUs
+# 模型类型(真正加载模型的时候是加载的该模型，也就是RealESRNetModel类）
+model_type: RealESRNetModel
+# 缩放倍数
+scale: 4
+# 几个gpu
+num_gpu: auto  # auto: can infer from your visible devices automatically. official: 4 GPUs
+# 随机数种子
+manual_seed: 0
+
+# ----------------- options for synthesizing training data in RealESRNetModel ----------------- #
+gt_usm: True  # USM the ground-truth
+
+# the first degradation process
+# 第一个降质过程，将图像进行大小的缩放，每种缩放方式的概率
+resize_prob: [0.2, 0.7, 0.1]  # up, down, keep
+# 缩放的比率，如果是down就在[0.15,1]之间的高斯分布random个数，如果是up就在[1,1.5]之间的高斯分布random个数
+resize_range: [0.15, 1.5]
+gaussian_noise_prob: 0.5
+noise_range: [1, 30]
+poisson_scale_range: [0.05, 3]
+gray_noise_prob: 0.4
+jpeg_range: [30, 95]
+
+# the second degradation process
+# 第一个降质过程，将图像模糊处理
+second_blur_prob: 0.8
+# 将图像进行大小的缩放，每种缩放方式的概率
+resize_prob2: [0.3, 0.4, 0.3]  # up, down, keep
+# 缩放的比率，如果是down就在[0.3,1]之间的高斯分布random个数，如果是up就在[1,1.2]之间的高斯分布random个数
+resize_range2: [0.3, 1.2]
+gaussian_noise_prob2: 0.5
+noise_range2: [1, 25]
+poisson_scale_range2: [0.05, 2.5]
+gray_noise_prob2: 0.4
+jpeg_range2: [30, 95]
+
+gt_size: 256
+# 队列的长度，因为每次在进行图像处理的时候每个batch是一样的操作，queue可以存储多个batch的图像，增加了训练的多样性
+queue_size: 360
+
+# dataset and data loader settings
+datasets:
+  train:
+    # 数据集的名字
+    name: landsea
+    # 数据集属于哪个类（RealESRGANDataset是作者自定义的Dataset类）
+    type: RealESRGANDataset
+    # 数据集所在的根目录
+    dataroot_gt: /root/work/real-esrgan/train/datasets/landsea/train
+    # 数据集中所有图像路径的txt文件
+    meta_info: /root/work/real-esrgan/train/datasets/landsea/meta_info/meta_info_landsea.txt
+    # 在disk中做io
+    io_backend:
+      type: disk
+
+    blur_kernel_size: 21
+    kernel_list: ['iso', 'aniso', 'generalized_iso', 'generalized_aniso', 'plateau_iso', 'plateau_aniso']
+    kernel_prob: [0.45, 0.25, 0.12, 0.03, 0.12, 0.03]
+    sinc_prob: 0.1
+    blur_sigma: [0.2, 3]
+    betag_range: [0.5, 4]
+    betap_range: [1, 2]
+
+    blur_kernel_size2: 21
+    kernel_list2: ['iso', 'aniso', 'generalized_iso', 'generalized_aniso', 'plateau_iso', 'plateau_aniso']
+    kernel_prob2: [0.45, 0.25, 0.12, 0.03, 0.12, 0.03]
+    sinc_prob2: 0.1
+    blur_sigma2: [0.2, 1.5]
+    betag_range2: [0.5, 4]
+    betap_range2: [1, 2]
+
+    final_sinc_prob: 0.8
+
+    gt_size: 256
+    use_hflip: True
+    use_rot: False
+
+    # data loader
+    # 是否打乱
+    use_shuffle: true
+    # 如果是用gpu加载数据，每个gpu加载的worker数
+    num_worker_per_gpu: 4
+    # batch_size
+    batch_size_per_gpu: 12
+    # 数据集扩充
+    dataset_enlarge_ratio: 1
+    # ??
+    prefetch_mode: ~
+
+  # Uncomment these for validation
+  val:
+    # 数据集的名字
+    name: validation
+    # 数据集属于哪个类（PairedImageDataset是作者自定义的Dataset类）
+    type: PairedImageDataset
+    dataroot_gt: /root/work/real-esrgan/train/datasets/landsea/val/hr
+    dataroot_lq: /root/work/real-esrgan/train/datasets/landsea/val/lr
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  # 生成器使用RRDBNet(RRDBNet是由很多个RRDB组成的，RRDB就是residual in residual dense block)
+  type: RRDBNet
+  # RRDBNet输入通道数
+  num_in_ch: 3
+  # RRDBNet输出通道数
+  num_out_ch: 3
+  # RRDB第一次卷积的输出通道数
+  num_feat: 64
+  # RRDB中内部的层数（实际是24层）
+  num_block: 23
+  # RRDB中每次卷积通道数增加数
+  num_grow_ch: 32
+
+# path
+path:
+  # 预训练模型的权重位置，该权重文件对应的是RRDBNet
+  pretrain_network_g: /root/work/real-esrgan/train/experiments/pretrained_models/psnr20iter5k.pth
+  # 没用上，在预训练模型的权重文件中没有这个参数
+  param_key_g: params_ema
+  # torch.load加载模型时，是否使用严格模式
+  strict_load_g: true
+  #
+  resume_state: ~
+
+# training settings
+train:
+  # 滑动平均系数，在该代码中，会构建两个网络，一个带滑动平均，一个不带滑动平均，
+  # 带滑动平均的网络用于预测，不带滑动平均的网络用于训练。
+  # 但实际上因为两个网络都是用的一个预训练权重，所以两个网络的参数是一样的
+  ema_decay: 0.999
+  optim_g:
+    # Adam优化器
+    type: Adam
+    # 学习率
+    lr: !!float 2e-4
+    # 惩罚系数
+    weight_decay: 0
+    # Adam中的动量系数
+    betas: [0.9, 0.99]
+
+  scheduler:
+    # 学习率
+    type: MultiStepLR
+    # MultiStepRestartLR，在第1000000个iter时，学习率变为原来的gamma倍
+    milestones: [1000000]
+    # MultiStepRestartLR，在第1000000个iter时，学习率变为原来的gamma倍
+    gamma: 0.5
+
+  # 总共循环多少个iter,，epoch = total_iter / (num_data / batch_size)
+  total_iter: 4000
+  # 是否warmup
+  warmup_iter: -1  # no warm up
+
+  # losses
+  pixel_opt:
+    # L1损失
+    type: L1Loss
+    # L1损失的权重
+    loss_weight: 1.0
+    # 聚合方式
+    reduction: mean
+
+# Uncomment these for validation
+# validation settings
+val:
+  val_freq: !!float 2000
+  save_img: True
+  pbar: True
+  metrics:
+    psnr: # metric name
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: false
+
+# logging settings
+logger:
+  # 日志打印频率
+  print_freq: 10
+  # 多少个iter保存一下权重
+  save_checkpoint_freq: !!float 2e3
+  # tensorboard日志
+  use_tb_logger: true
+  # 类似于tensorboard的可视化工具
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  # ddp多卡分布式训练backend参数
+  backend: nccl
+  port: 29500

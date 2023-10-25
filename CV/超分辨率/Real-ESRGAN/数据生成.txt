@@ -1,0 +1,15 @@
+生成小图yuv
+ffmpeg -i ${源视频文件} -vf scale=428:240 -r 10 -pix_fmt yuv420p ${p}.yuv
+landsea_x265Encoder ${p}.yuv ${p}.hevc
+ffmpeg -i ${p}.hevc ${name}.yuv
+
+
+
+
+生成大图yuv
+ffmpeg -i ${源视频文件} -vf scale=1708:960 -r 10 -pix_fmt yuv420p ${name}.yuv
+
+
+ffmpeg -i ch01_20230717000000.mp4 -vf scale=428:240 -r 10 -t 00:03:00 -pix_fmt yuv420p 1.yuv
+landsea_x265Encoder 1.yuv 1.hevc
+ffmpeg -i 1.hevc 111.yuv
