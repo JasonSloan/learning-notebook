@@ -1,0 +1,10 @@
+*.pyc
+a.out
+*.o
+*.a
+.idea
+
+generated
+decompressor
+compressedLog
+processedFiles

@@ -1,0 +1,21 @@
+*.o
+*.a
+*.log
+test
+TTTest
+.depend
+
+testHelper/GeneratedCode.cc
+decompressor
+compressedLog
+nbproject
+Bench.sh
+Benchmark
+perf
+
+googletest
+
+# IDE project files
+.idea/
+cmake-build-debug/
+CMakeLists.txt
