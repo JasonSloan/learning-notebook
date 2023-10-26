@@ -20,3 +20,19 @@ Real-ESRGAN训练代码理解，代码改动。
 # 三、训练
 ## 1. google-research-tuning-playbook-chinese
 基于谷歌研究院的训练调参指南的个人中文翻译
+
+# 四、常用脚本
+
+详细请看该目录下的README.md
+
+# 五、Python
+
+## 1. 日志
+
+logger.py
+
+# 六、C++
+
+## 1. 日志
+
+NanoLog
