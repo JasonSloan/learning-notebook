@@ -17,13 +17,14 @@ Real-ESRGAN训练代码理解，代码改动。
 ## 1. TensorRT
 ### (1) trt inference
 一次完整的基于trtpy库使用C++版本TensorRT推理超分辨率模型Real-ESRGAN的代码整理
-# 三、训练
-## 1. google-research-tuning-playbook-chinese
-基于谷歌研究院的训练调参指南的个人中文翻译
 
-# 四、常用脚本
+# 三、常用脚本
 
 详细请看该目录下的README.md
+
+# 四、训练
+## 1. google-research-tuning-playbook-chinese
+基于谷歌研究院的训练调参指南的个人中文翻译
 
 # 五、Python
 
