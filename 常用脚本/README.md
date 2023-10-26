@@ -18,6 +18,6 @@
 
 主要是使用python调用linux命令
 
-# 6，logger.py
+# 6. logger.py
 
 python日志，随取随用

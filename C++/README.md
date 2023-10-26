@@ -1,10 +1,10 @@
-#1、安装
+# 1、安装
 
 进入官网下载代码：<https://github.com/PlatformLab/NanoLog>
 
 解压：cd runtime && make
 
-#2、与目标文件一起编译的选项
+# 2、与目标文件一起编译的选项
 
 ```C++
 // 头文件搜索路径;库文件搜索路径;需要连接的库;启用多线程;将格式化字符串的warning当做error            
@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 
 
 
-#4、查看日志
+# 4、查看日志
 
 ```C++
 cd NanoLog-master/runtime
