@@ -1,3 +1,0 @@
-/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/build/CMakeFiles/pro.dir
-/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/build/CMakeFiles/edit_cache.dir
-/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/build/CMakeFiles/rebuild_cache.dir
