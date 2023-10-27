@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2"
+CMAKE_SOURCE_DIR = "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.4"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/build"
+CMAKE_BINARY_DIR = "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.4/build"
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/pro.dir/clean
 CMakeFiles/pro.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pro.dir/build.make CMakeFiles/pro.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pro.dir/build.make CMakeFiles/pro.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/build/CMakeFiles" --progress-num=1,2 "Built target pro"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="/root/learning-notebook/1. CV/OpenCV-C++/chapter10.4/build/CMakeFiles" --progress-num=1,2 "Built target pro"
 .PHONY : CMakeFiles/pro.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/pro.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/build/CMakeFiles" 2
+	$(CMAKE_COMMAND) -E cmake_progress_start "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.4/build/CMakeFiles" 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/pro.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/build/CMakeFiles" 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/root/learning-notebook/1. CV/OpenCV-C++/chapter10.4/build/CMakeFiles" 0
 .PHONY : CMakeFiles/pro.dir/rule
 
 # Convenience name for target.

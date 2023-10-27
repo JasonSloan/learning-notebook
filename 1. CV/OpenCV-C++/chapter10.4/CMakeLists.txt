@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 # 工程名称
 project(pro)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 # 寻找OpenCV库
 find_package(OpenCV REQUIRED)
 # 包含头文件

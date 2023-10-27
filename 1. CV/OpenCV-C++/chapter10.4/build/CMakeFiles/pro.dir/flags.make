@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I"/root/learning-notebook/1. CV/OpenCV-C++/chapter10.2/include" -isystem /usr/include/opencv4
+CXX_INCLUDES = -I"/root/learning-notebook/1. CV/OpenCV-C++/chapter10.4/include" -isystem /usr/include/opencv4
 
-CXX_FLAGS = 
+CXX_FLAGS =  -g
 
