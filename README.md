@@ -18,6 +18,10 @@ Real-ESRGAN训练代码理解，代码改动。
 ### (1) trt inference
 一次完整的基于trtpy库使用C++版本TensorRT推理超分辨率模型Real-ESRGAN的代码整理
 
+### (2)  trtpy docs
+trtpy的学习笔记资料
+
+
 # 三、常用脚本
 
 详细请看该目录下的README.md
@@ -37,3 +41,7 @@ logger.py
 ## 1. 日志
 
 NanoLog
+
+## 2. 多线程
+
+深度学习推理中多线程相关知识
