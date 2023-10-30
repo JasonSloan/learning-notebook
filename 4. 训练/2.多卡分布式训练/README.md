@@ -4,7 +4,7 @@
 
 代码：github[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/commits?author=WZMIAOMIAO)                                [train_multi_GPU](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_classification/train_multi_GPU)
 
-知乎博客：**极视平台 **  					         [实操教程 | GPU多卡并行训练总结（以pytorch为例）](https://zhuanlan.zhihu.com/p/403339155)
+知乎博客：**极视平台**  					         [实操教程 | GPU多卡并行训练总结（以pytorch为例）](https://zhuanlan.zhihu.com/p/403339155)
 
 CSDN博客：[钱彬 ](https://qianbin.blog.csdn.net/)                                                  [多卡分布式训练代码如何debug](https://blog.csdn.net/qianbin3200896/article/details/108182504)
 
