@@ -2,7 +2,7 @@
 
 视频：b站UP主**霹雳吧啦Wz**                                 [pytorch多GPU并行训练教程](https://www.bilibili.com/video/BV1yt4y1e7sZ/?spm_id_from=333.999.0.0&vd_source=2fa3840975cc19817a9a15ddf8a1a81b)
 
-代码：github[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/commits?author=WZMIAOMIAO)                                [train_multi_GPU](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_classification/train_multi_GPU)
+代码：github**WZMIAOMIAO**                         [train_multi_GPU](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_classification/train_multi_GPU)
 
 知乎博客：**极视平台**  					         [实操教程 | GPU多卡并行训练总结（以pytorch为例）](https://zhuanlan.zhihu.com/p/403339155)
 
