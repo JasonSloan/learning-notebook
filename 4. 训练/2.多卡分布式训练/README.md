@@ -65,11 +65,11 @@ $ python -m torch.distributed.launch --nproc_per_node=2 tools/train.py --model b
 
 2.**数据并行方式**：将整个模型放在一块GPU里，再复制到每一块GPU上，同时进行正向传播和反向误差传播。相当于加大了batch_size。（下图右半部分）
 
-![img](assets/ddp mode.png)
+![img](assets/ddp_mode.png)
 
 在pytorch1.7 + cuda10 + TeslaV100的环境下，使用ResNet34，batch_size=16, SGD对花草数据集训练的情况如下：使用一块GPU需要9s一个epoch，使用两块GPU是5.5s， 8块是2s。这里有一个问题，为什么运行时间不是9/8≈1.1s ? 因为使用GPU数量越多，设备之间的通讯会越来越复杂，所以随着GPU数量的增加，训练速度的提升也是递减的。
 
-![img](assets/training time.png)
+![img](assets/training_time.png)
 
 # 五.**误差梯度如何在不同设备之间通信？**
 
@@ -90,7 +90,7 @@ $ python -m torch.distributed.launch --nproc_per_node=2 tools/train.py --model b
 
 # 八.  **pytorch中常见的GPU启动方式：**
 
-![img](assets/torch methods.png)
+![img](assets/torch_methods.png)
 
 注：distributed.launch方法如果开始训练后，手动终止程序，最好先看下显存占用情况，有小概率进程没kill的情况，会占用一部分GPU显存资源。
 
