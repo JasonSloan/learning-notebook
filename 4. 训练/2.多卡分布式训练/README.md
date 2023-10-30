@@ -6,7 +6,7 @@
 
 知乎博客：**极视平台**  					         [实操教程 | GPU多卡并行训练总结（以pytorch为例）](https://zhuanlan.zhihu.com/p/403339155)
 
-CSDN博客：[钱彬 ](https://qianbin.blog.csdn.net/)                                                  [多卡分布式训练代码如何debug](https://blog.csdn.net/qianbin3200896/article/details/108182504)
+CSDN博客：**钱彬**                                                 [多卡分布式训练代码如何debug](https://blog.csdn.net/qianbin3200896/article/details/108182504)
 
 **本文件夹下的代码主要注释了入口为train_multi_gpu_using_launch.py的多卡分布式训练代码。**
 
