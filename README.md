@@ -30,6 +30,10 @@ trtpy的学习笔记资料
 ## 1. google-research-tuning-playbook-chinese
 基于谷歌研究院的训练调参指南的个人中文翻译
 
+## 2. 多卡分布式训练教程
+
+基于b站UP主霹雳吧啦Wz的教程，包括如何实现分布式训练以及如何debug分布式训练代码
+
 # 五、Python
 
 ## 1. 日志
