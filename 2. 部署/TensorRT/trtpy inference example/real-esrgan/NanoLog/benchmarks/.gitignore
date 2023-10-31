@@ -1,0 +1,23 @@
+# Geneated files
+*.o
+BenchmarkConfig.h
+generated/
+._*
+.depend_nanolog
+
+# Generated executables
+benchmark
+unloadedLatency
+decompressor
+
+# Log files
+compressedLog
+logFile
+
+# Libraries
+snappy
+libsnappy.a
+libNanoLog.a
+
+# Benchmark results
+results/
