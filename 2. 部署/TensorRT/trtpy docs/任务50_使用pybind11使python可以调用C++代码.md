@@ -253,6 +253,7 @@ $(name)   : $(workdir)/$(name)
 
 all       : $(name)
 # 相比于普通Makefile增加：python demo.py，这也就是为什么make run能够运行python代码
+# 相比于普通Makefile去掉：&& ./$(name) $(run_args)，防止直接运行生成的动态库
 run       : $(name)
 	@cd $(workdir) && python demo.py $(run_args)
 
