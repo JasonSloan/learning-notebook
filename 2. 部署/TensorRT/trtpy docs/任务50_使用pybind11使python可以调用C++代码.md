@@ -174,7 +174,7 @@ cv2.imwrite("detect.jpg", image)
 
 
 
-**Makefile，有几处改变的地方**
+**Makefile，有几处改变的地方，改动的地方全部以注释"# 相比于普通Makefile"标注**
 
 ```makefile
 cc        := g++
