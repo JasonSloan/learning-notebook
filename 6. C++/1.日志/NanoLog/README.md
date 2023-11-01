@@ -2,6 +2,8 @@
 
 进入官网下载代码：<https://github.com/PlatformLab/NanoLog>
 
+cd runtime目录，修改该目录下的GNUmakefile的第21行，改为CXX_ARGS=-std=c++17 -g -O3 -fPIC，因为很多时候要将程序编为动态库，而动态库必须是-fPIC (Position Independent Code)，所以编译NanoLog的时候增加-fPIC这个选项。
+
 解压：cd runtime && make
 
 # 2、与目标文件一起编译的选项
