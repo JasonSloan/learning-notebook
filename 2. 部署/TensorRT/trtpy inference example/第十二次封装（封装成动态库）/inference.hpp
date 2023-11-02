@@ -5,11 +5,11 @@
 #include <string>
 
 
-class InferInterface
-{
+class InferInterface{
 public:
-    virtual std::vector<uint8_t> forward(const std::string& imagePath, int& width, int& height) = 0;
+    virtual std::vector<uint8_t> forward(std::vector<uint8_t>& input_image_bytes) = 0;
 };
+
 std::shared_ptr<InferInterface> create_infer(const std::string &file);
 
 #endif //INFERENCE_HPP
