@@ -10,14 +10,30 @@
 
 将yuv图像转成png图像
 
-# 4. train_test_split.py
+# 4. image_convert_2_binary
+
+将本地图片读取并转换成二进制数据
+
+# 5. array_convert_2_binary
+
+将一个ndarray图像数据转换成二进制图像数据
+
+# 6. binary_convert_2_image
+
+将一个二进制图像数据转换成图像保存到本地
+
+# 7. base64EncodeDecode
+
+将图像编码成base64数据，将base64数据解码成图像
+
+# 8. generate_paired_images_from_videos.py
+
+主要是熟悉一下如何使用python调用linux命令
+
+# 9. train_test_split.py
 
 按照比例划分数据集
 
-# 5. generate_paired_images_from_videos.py
-
-主要是使用python调用linux命令
-
-# 6. logger.py
+# 10. logger.py
 
 python日志，随取随用
