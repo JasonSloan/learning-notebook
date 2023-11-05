@@ -1,16 +1,26 @@
+**注意**：
+
+1. pybind11不用安装，该节代码中的pybind11.hpp文件就是全部实现的完整代码。
+
+2. 使用pybind11时，如果C++中的代码中返回的是一张图片（数组或者std::vector形式存储），那么对应于Python中是列表，而Python中的列表中存储的是一个一个的对象，非常消耗资源。所以需要在C++中返回ndarray形式的图片数据，对应于pybind11中是就是"pybind11::array_t<uint8_t>"形式的数据。
+
+3. C++中pybind11::array、C++中numpy的ndarray、Python中的numpy的ndarray，这三种类型的数据是相等的、互通的。
+
+4. pybind11::array与pybind11::array_t区别可以gpt查询
+
+5. pybind11不支持C++返回cv::Mat类型的数据，pybind11支持C++返回numpy的ndarray类型数据。
+
+6. 如果已使用pybind11将interface.cpp编译结束，单独执行demo.py不成功，需要执行以下命令以设置环境变量
+
+   ```bash
+   source `trtpy env-source --print`
+   ```
+
+   为什么make run可以执行，但是单独执行demo.py不能执行，因为Makefile最后一句将库文件搜索路径添加到了环境变量里。
+
+   ​
+
 **本节是以yolov5的推理为例，使用pybind11将C++代码封装成python可以调用的库**
-
-注意pybind11不用安装，该节代码中的pybind11.hpp文件就是全部实现的完整代码。
-
-
-
-如果已使用pybind11将interface.cpp编译结束，单独执行demo.py不成功，需要执行以下命令以设置环境变量
-
-```bash
-source `trtpy env-source --print`
-```
-
-为什么make run可以执行，但是单独执行demo.py不能执行，因为Makefile最后一句将库文件搜索路径添加到了环境变量里。
 
 
 
