@@ -1,11 +1,11 @@
 cc        := g++
-name      := pro
+name      := sr.so
 workdir   := workspace
 srcdir    := src
 objdir    := objs
 stdcpp    := c++17
 cuda_home := /root/software/anaconda3/envs/trtpy/lib/python3.9/site-packages/trtpy/trt8cuda115cudnn8
-nano_home := /root/SuperResolution/real-esrgan/NanoLog/runtime
+nano_home := /root/SuperResolution/real-esrgan/src/NanoLog/runtime
 syslib    := /root/software/anaconda3/envs/trtpy/lib/python3.9/site-packages/trtpy/lib
 cpp_pkg   := /root/software/anaconda3/envs/trtpy/lib/python3.9/site-packages/trtpy/cpp-packages
 cuda_arch := 
@@ -29,7 +29,7 @@ link_nano      := NanoLog rt
 link_trtpro    := 
 link_tensorRT  := nvinfer nvinfer_plugin
 link_opencv    := opencv_core opencv_imgproc opencv_imgcodecs
-link_sys       := stdc++ dl protobuf
+link_sys       := stdc++ dl protobuf python3.9
 link_librarys  := $(link_cuda) $(link_tensorRT) $(link_sys) $(link_opencv) $(link_nano)
 
 # 定义头文件路径，请注意斜杠后边不能有空格
@@ -40,10 +40,11 @@ include_paths := src              \
     $(cuda_home)/include/cuda     \
 	$(cuda_home)/include/tensorRT \
 	$(cpp_pkg)/opencv4.2/include  \
-	$(cuda_home)/include/protobuf
+	$(cuda_home)/include/protobuf \
+	/root/software/anaconda3/envs/trtpy/include/python3.9
 
 # 定义库文件路径，只需要写路径，不需要写-L
-library_paths := $(cuda_home)/lib64 $(syslib) $(cpp_pkg)/opencv4.2/lib $(nano_home)
+library_paths := $(cuda_home)/lib64 $(syslib) $(cpp_pkg)/opencv4.2/lib $(nano_home) /root/software/anaconda3/envs/trtpy/lib
 
 # 把library path给拼接为一个字符串，例如a b c => a:b:c
 # 然后使得LD_LIBRARY_PATH=a:b:c
@@ -76,12 +77,11 @@ $(name)   : $(workdir)/$(name)
 
 all       : $(name)
 run       : $(name)
-	@cd $(workdir) && ./$(name) $(run_args)
 
 $(workdir)/$(name) : $(cpp_objs) $(cu_objs)
 	@echo Link $@
 	@mkdir -p $(dir $@)
-	@$(cc) $^ -o $@ $(link_flags)
+	@$(cc) -shared $^ -o $@ $(link_flags)
 
 $(objdir)/%.cpp.o : $(srcdir)/%.cpp
 	@echo Compile CXX $<
@@ -110,7 +110,7 @@ clean :
 	@rm -rf $(objdir) $(workdir)/output_image.jpg $(workdir)/$(name)
 	
 debug:
-	@echo $(objdir)
+	@echo $(library_paths)
 
 
 # 防止符号被当做文件

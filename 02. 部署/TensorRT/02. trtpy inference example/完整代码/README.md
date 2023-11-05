@@ -30,6 +30,8 @@ onnx/**：onnx源文件，一般无需修改变动
 
 onnx/-tensorrt/**：onnx-tensorrt源文件，一般无需修改变动
 
+NanoLog/**：NanoLog源码，一般无需改动
+
 inference.cpp：C++推理代码中的源文件（各个章节的头文件和源文件只要替换掉对应的就能直接运行）
 
 main.cpp：测试inference.cpp的入口文件
@@ -41,6 +43,12 @@ onnx/**：onnx源文件，一般无需修改变动
 onnx/-tensorrt/**：onnx-tensorrt源文件，一般无需修改变动
 
 main.cpp：将onnx模型编译成tensorrt模型的文件（因为在编写过程中需要经常重新编译onnx模型，所以只需要将src文件夹改名为src1，src2改名为src，然后make run -j6就能运行编译）
+
+**tmp:**
+
+main.cpp：如果想编译成可执行文件，需要把main.cpp放入src文件夹
+
+Makefile(executable)：如果想生成可执行文件并执行，需要把该文件替换掉外面的Makefile
 
 **workspace：**
 

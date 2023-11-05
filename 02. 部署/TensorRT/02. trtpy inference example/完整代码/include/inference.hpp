@@ -3,11 +3,18 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include "pybind11.hpp"
+#include "opencv2/opencv.hpp"
 
+struct Result{
+    pybind11::array_t<uint8_t> output_array;
+    int code;
+    std::string id;
+};
 
 class InferInterface{
 public:
-    virtual std::vector<uint8_t> forward(std::vector<uint8_t>& input_image_bytes) = 0;
+    virtual Result forward(cv::Mat& cvimage, const std::string& id) = 0;
 };
 
 std::shared_ptr<InferInterface> create_infer(const std::string &file);

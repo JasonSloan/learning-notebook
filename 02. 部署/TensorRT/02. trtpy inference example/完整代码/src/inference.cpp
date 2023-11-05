@@ -20,17 +20,18 @@
 #include "opencv2/opencv.hpp"
 #include "inference.hpp"
 #include "NanoLogCpp17.h"
+#include "pybind11.hpp"
 
 using namespace std;
 using namespace NanoLog::LogLevels;
-
-void data_cast(float* src, uint8_t* dst, int output_width, int output_height, int src_line_size, int dst_line_size);  // data_cast.cu中的函数
-
+namespace py = pybind11;
 
 struct Job{
-    shared_ptr<promise<std::vector<uint8_t>>> pro;                         //为了实现线程间数据的传输，需要定义一个promise，由智能指针托管
-    std::vector<uint8_t> input_image;
+    shared_ptr<promise<Result>> pro;                         //为了实现线程间数据的传输，需要定义一个promise，由智能指针托管;Result是一个结构体，来自头文件
+    cv::Mat input_image;
+    string id;
 };
+
 
 #define checkRuntime(op)  __check_cuda_runtime((op), #op, __FILE__, __LINE__)
 
@@ -126,7 +127,7 @@ public:
     }
 
     bool startup(const string& file){
-        NanoLog::setLogFile("inference.log");
+        NanoLog::setLogFile("/root/SuperResolution/flask/logs/inference.log");
         NanoLog::preallocate();
         NanoLog::setLogLevel(NOTICE);
         modelPath = file;
@@ -161,54 +162,53 @@ public:
                 fetched_jobs.emplace_back(std::move(jobs_.front()));            // 往里面fetched_jobs里塞东西  
                 jobs_.pop();                                                    // 从jobs_任务队列中将当前要推理的job给pop出来 
                 for(auto& job : fetched_jobs){                                  // 遍历要推理的job         // todo:如果需要这里可以改成多batch推理，但是要求宽高要一样
-                    auto start_time = std::chrono::high_resolution_clock::now();
                     inference(job);                                             // 调用inference执行推理
-                    auto end_time = std::chrono::high_resolution_clock::now();
-                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-                    printf("Total time consuming: %lld ms\n", duration.count());
-                    NANO_LOG(NOTICE, "test");  // todo:删除这一行
                 }
                 fetched_jobs.clear();
             }
-        printf("Infer worker done.\n");
         }
     }
 
 
     // 实际上forward函数是生产者
-    virtual std::vector<uint8_t> forward(std::vector<uint8_t>& input_image_bytes) override{        
+    virtual Result forward(cv::Mat& cvimage, const string& id) override{        
         Job job;
-        job.pro.reset(new promise<std::vector<uint8_t>>());
-        job.input_image = input_image_bytes;
+        job.pro.reset(new promise<Result>());
+        job.input_image = cvimage;
+        job.id = id;
 
-        shared_future<std::vector<uint8_t>> fut = job.pro->get_future();        // get_future()并不会等待数据返回，get_future().get()才会
+        shared_future<Result> fut = job.pro->get_future();        // get_future()并不会等待数据返回，get_future().get()才会
         {
             lock_guard<mutex> l(lock_);
             jobs_.emplace(std::move(job));                                      // 向任务队列jobs_中添加任务job
         }
         cv_.notify_one();                                                       // 通知worker线程开始工作了
-        return fut.get();                                                       // 等待模型将推理数据返回fut，然后fut再将数据return出去
+        Result result = fut.get();                                              // 等待模型将推理数据返回fut，然后fut再将数据return出去， 这里因为.get是一个阻塞函数，会等待数据返回，所以这个队列没啥意义
+        // std::vector<uint8_t> output_image_vector = result.output_vector;                   // 等待模型将推理数据返回fut，然后fut再将数据return出去
+        // int height = cvimage.rows * scale_factor;
+        // int width = cvimage.cols * scale_factor;
+        // cv::Mat cv_output_image(height, width, CV_8UC3, output_image_vector.data());      // 将返回的数据解码成cv::Mat
+        // cv::imwrite("output.jpg", cv_output_image);                                       // 将cv::Mat保存成jpg
+        return result;
     }
 
     void inference(Job& job){
             checkRuntime(cudaStreamCreate(&stream)); 
-            cv::Mat image = cv::imdecode(job.input_image, cv::IMREAD_COLOR);
+            string id = job.id;
+            cv::Mat image = job.input_image;
             int input_channel = image.channels();   
             int input_height = image.rows;
             int input_width = image.cols;
             // 宽高判断
-            if (input_height < 64 || input_width < 64 || input_height > 720 || input_width > 1080){
-                job.pro->set_value(std::vector<uint8_t>());
-                printf("Input image is too large or too small!\n");
-                printf("Input image should be greater than 64*64(w,h) and less than 720*1080(w,h)!\n");
-                NANO_LOG(ERROR, "Input image is too large or too small!");
+            if (input_height < 32 || input_width < 32 || input_height > 720 || input_width > 720){
+                job.pro->set_value(Result{py::array_t<uint8_t>(), -1, id});
+                NANO_LOG(ERROR, "Image ID: '%s', input image is too large or too small!", id.c_str());
                 return;
             }
             // 通道数判断
             if (input_channel != 3){
-                job.pro->set_value(std::vector<uint8_t>());
-                printf("Input image should have 3 channels, got %d instead!\n", input_channel);
-                NANO_LOG(ERROR, "Input image should have 3 channels");
+                job.pro->set_value(Result{py::array_t<uint8_t>(), -2, id});
+                NANO_LOG(ERROR, "Image ID: '%s', input image should have 3 channels", id.c_str());
                 return;
             }
             int input_numel = input_batch * input_channel * input_height * input_width;
@@ -218,8 +218,6 @@ public:
             checkRuntime(cudaMalloc(&input_data_device, input_numel * sizeof(float)));
 
 
-            auto pre_start_time = std::chrono::high_resolution_clock::now();
-            /*----------------------------前处理+推理计时开始---------------------------------*/
             int image_area = image.cols * image.rows;
             unsigned char* pimage = image.data;
             float* phost_b = input_data_host + image_area * 0;
@@ -231,13 +229,8 @@ public:
                 *phost_g++ = pimage[1] / 255.0f;
                 *phost_b++ = pimage[2] / 255.0f;
             }
-            /*----------------------------前处理计时结束---------------------------------*/
-            auto pre_end_time = std::chrono::high_resolution_clock::now();
-            auto pre_duration = std::chrono::duration_cast<std::chrono::milliseconds>(pre_end_time - pre_start_time);
-            printf("Preprocess time consuming: %ld ms\n", pre_duration.count());  
 
-            auto infer_start_time = std::chrono::high_resolution_clock::now();
-            /*----------------------------推理计时开始---------------------------------*/
+
             checkRuntime(cudaMemcpyAsync(input_data_device, input_data_host, input_numel * sizeof(float), cudaMemcpyHostToDevice, stream));
 
             int output_batch = input_batch;
@@ -263,31 +256,21 @@ public:
 
             bool success      = execution_context->enqueueV2((void**)bindings, stream, nullptr);                  
             if(!success){
-                job.pro->set_value(std::vector<uint8_t>());
-                printf("Model inference failure!\n");
-                NANO_LOG(ERROR, "Model inference failure");
+                job.pro->set_value(Result{py::array_t<uint8_t>(), -3, id});
+                NANO_LOG(ERROR, "Image ID: '%s', Model inference failure", id.c_str());
                 return;
             }
 
             checkRuntime(cudaMemcpyAsync(output_data_host, output_data_device, output_numel * sizeof(float), cudaMemcpyDeviceToHost, stream));
             checkRuntime(cudaStreamSynchronize(stream));
-            /*----------------------------推理计时结束---------------------------------*/
-            auto infer_end_time = std::chrono::high_resolution_clock::now();
-            auto infer_duration = std::chrono::duration_cast<std::chrono::milliseconds>(infer_end_time - infer_start_time);
-            printf("Inference time consuming: %ld ms\n", infer_duration.count());  
             
-            
-            auto post_start_time = std::chrono::high_resolution_clock::now();
-            /*----------------------------后处理计时开始---------------------------------*/
+
             uint8_t* output_data_uchar = new uint8_t[output_numel];
             for (int i = 0; i < output_numel; ++i){
                 output_data_uchar[i] = static_cast<uint8_t>(output_data_host[i]);
             }
-            std::vector<uint8_t> output_vector(output_data_uchar, output_data_uchar + output_numel);
-            /*----------------------------后处理计时结束---------------------------------*/
-            auto post_end_time = std::chrono::high_resolution_clock::now();
-            auto post_duration = std::chrono::duration_cast<std::chrono::milliseconds>(post_end_time - post_start_time);
-            printf("Postprecess time consuming: %ld ms\n", post_duration.count()); 
+            py::array_t<uint8_t> output_array(output_numel, output_data_uchar);
+            // cv::Mat output_array(output_height, output_width, CV_8UC3, output_data_uchar);
             
             delete [] output_data_uchar;
             checkRuntime(cudaFree(output_data_device)); 
@@ -296,7 +279,7 @@ public:
             checkRuntime(cudaFreeHost(input_data_host));
             checkRuntime(cudaStreamDestroy(stream));
             
-            job.pro->set_value(output_vector);
+            job.pro->set_value(Result{output_array, 0, id});
     }
 
 private:
