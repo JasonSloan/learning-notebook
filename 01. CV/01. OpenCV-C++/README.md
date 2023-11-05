@@ -1,6 +1,13 @@
 # OpenCV-Cplusplus
 This is an OpenCV-C++ learning repo. The code is based on the pdf file named "OpenCV programming guide".The code can be run directly by cmake.
 
+Install OpenCV with ubuntu command:
+
+```bash
+sudo apt update
+sudo apt-get install -y libopencv-dev
+```
+
 # Requirements
 Mine is :    
 ubuntu platform 20.04    
