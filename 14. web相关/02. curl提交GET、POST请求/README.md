@@ -1,3 +1,15 @@
+# 一. curl提交GET请求
+
+```python
+语法格式
+curl protocol://address:port/url?args
+ 
+示例：
+curl http://127.0.0.1:8080/login?admin&passwd=12345678  # 带参数请求，参数用&连接
+```
+
+# 二. curl提交POST请求
+
 ```python
 语法格式：
 curl -X POST [options] [URL]
