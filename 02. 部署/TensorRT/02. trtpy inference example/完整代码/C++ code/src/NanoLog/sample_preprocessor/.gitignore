@@ -1,0 +1,16 @@
+decompressor
+compressedLog
+sampleApplication
+generated/
+results/
+
+*.a
+*.o
+*.i
+*.ii
+*.map
+.depend_nanolog
+
+# IDE files
+.idea
+nbproject
