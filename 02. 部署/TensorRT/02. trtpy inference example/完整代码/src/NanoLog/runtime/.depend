@@ -1,0 +1,18 @@
+Cycles.o: Cycles.cc Cycles.h Portability.h Initialize.h Util.h
+Util.o: Util.cc Util.h Portability.h
+Log.o: Log.cc Log.h Config.h Common.h Cycles.h Portability.h Packer.h \
+ TestUtil.h Util.h GeneratedCode.h NanoLog.h RuntimeLogger.h Fence.h
+NanoLog.o: NanoLog.cc NanoLog.h RuntimeLogger.h Config.h Common.h Fence.h \
+ Log.h Cycles.h Portability.h Packer.h TestUtil.h Util.h
+RuntimeLogger.o: RuntimeLogger.cc Cycles.h Portability.h RuntimeLogger.h \
+ Config.h Common.h Fence.h Log.h Packer.h TestUtil.h Util.h NanoLog.h
+TimeTrace.o: TimeTrace.cc TimeTrace.h Cycles.h Portability.h
+test_build/Cycles.o: Cycles.cc Cycles.h Portability.h Initialize.h Util.h
+test_build/Util.o: Util.cc Util.h Portability.h
+test_build/Log.o: Log.cc Log.h Config.h Common.h Cycles.h Portability.h Packer.h \
+ TestUtil.h Util.h GeneratedCode.h NanoLog.h RuntimeLogger.h Fence.h
+test_build/NanoLog.o: NanoLog.cc NanoLog.h RuntimeLogger.h Config.h Common.h Fence.h \
+ Log.h Cycles.h Portability.h Packer.h TestUtil.h Util.h
+test_build/RuntimeLogger.o: RuntimeLogger.cc Cycles.h Portability.h RuntimeLogger.h \
+ Config.h Common.h Fence.h Log.h Packer.h TestUtil.h Util.h NanoLog.h
+test_build/TimeTrace.o: TimeTrace.cc TimeTrace.h Cycles.h Portability.h
