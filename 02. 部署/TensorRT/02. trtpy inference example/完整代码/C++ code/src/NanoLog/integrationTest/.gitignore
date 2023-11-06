@@ -1,0 +1,15 @@
+
+compressedLog
+decompressor
+basic_decompressor
+generated/
+libNanoLog.a
+
+output.txt
+testApp
+*.o
+*.dmp
+.depend_nanolog
+
+#IDE files
+nbproject/
