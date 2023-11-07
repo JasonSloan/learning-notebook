@@ -26,7 +26,7 @@
 
 pt转成onnx不需要指定为half，只要在onnx转成engine时转成FP16类型的就行。此点存疑，但是如果指定为half，转成engine时，使用engine推理结果是不对的。
 
-![img](pics/export_onnx_properly.jpg)
+![img](assets/export_onnx_properly.jpg)
 
 # 二. 使用trtexec进行速度测试
 
