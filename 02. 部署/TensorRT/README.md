@@ -13,7 +13,7 @@ source ~/.bashrc
 查看当前trtpy信息
 trtpy info
 设置key
-trtpy set-key okvipkey 
+trtpy set-key ******(正式key)（正式key请联系微信"手写AI"）
 查看当前课程清单
 trtpy list-templ
 下载环境
