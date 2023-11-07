@@ -86,9 +86,9 @@ docker run --privileged -it --name face -p 8080:22 face_detection:v1  // 当需�
 sudo docker start face
 查看CONTAINER ID
 docker ps
-将镜像打成标签：其中face_detection为本地镜像名，jasonsloan为docker hub上的用户名，face_detection:v1标签名
-docker tag face_detection jasonsloan/face_detection:v1
-push到远程仓库
+将镜像打成标签：其中{image_id}为build好的镜像的哈希值，jasonsloan为docker hub上的用户名，face_detection:v1为docker hub上的仓库名
+docker tag {image_id} jasonsloan/face_detection:v1
+push到远程仓库，push前必须tag，所以push的时候就不用指定是哪个image了，只需要指定是远程哪个仓库
 docker push jasonsloan/face_detection:v1
 ```
 
