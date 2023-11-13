@@ -1,6 +1,6 @@
 官网notebook各种案例:https://github.com/openvinotoolkit/openvino_notebooks
 
-ps:第220项YOLOv5量化int8
+ps:第111项YOLOv5量化int8
 
 # 一. 安装
 
