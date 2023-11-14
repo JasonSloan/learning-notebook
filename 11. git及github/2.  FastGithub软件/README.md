@@ -22,12 +22,12 @@ github加速神器，解决github打不开、用户头像无法加载、releases
 
 #### 2.3 linux-x64终端
 * `sudo ./fastgithub`
-* 设置系统自动代理为`http://127.0.0.1:38457`，或手动代理http/https为`127.0.0.1:38457`
+* 使用命令`git config --global http.proxy http://127.0.0.1:38457 ` 进行代理设置
 
 #### 2.4 linux-x64服务
 * `sudo ./fastgithub start` // 以systemd服务安装并启动
 * `sudo ./fastgithub stop` // 以systemd服务卸载并删除
-* 设置系统自动代理为`http://127.0.0.1:38457`，或手动代理http/https为`127.0.0.1:38457`
+* 使用命令`git config --global http.proxy http://127.0.0.1:38457 ` 进行代理设置
 
 #### 2.5 macOS-x64
 * 双击运行fastgithub
