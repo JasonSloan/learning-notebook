@@ -261,6 +261,15 @@ if __name__ == "__main__":
     nncf_int8_path = f"{MODEL_PATH}/NNCF_INT8_openvino_model/{MODEL_NAME}_int8.xml"
     ov.save_model(quantized_model, nncf_int8_path, compress_to_fp16=False)
 
+    #============================保存配置(validate_model会用到配置文件)============================
+    model = attempt_load(
+        f"{MODEL_PATH}/{MODEL_NAME}.pt", device="cpu", inplace=True, fuse=True
+    ) 
+    metadata = {"stride": int(max(model.stride)), "names": model.names}  # model metadata
+    yaml_save(Path(nncf_int8_path).with_suffix(".yaml"), metadata)
+    yaml_save(Path(pot_int8_path).with_suffix(".yaml"), metadata)
+    yaml_save(Path(fp32_path).with_suffix(".yaml"), metadata)
+
     #============================模型评估============================
     fp32_ap5, fp32_ap_full = validate_model(fp32_path)
     pot_int8_ap5, pot_int8_ap_full = validate_model(pot_int8_path)
