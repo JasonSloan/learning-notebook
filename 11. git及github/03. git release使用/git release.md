@@ -1,0 +1,3 @@
+git release可以将安装包发布在github上, 然后wget就可以下载安装包.
+
+用法参考:[链接](https://blog.csdn.net/weixin_44639164/article/details/122126129?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169996739616800184115144%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=169996739616800184115144&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-122126129-null-null.142^v96^pc_search_result_base6&utm_term=github%20release%E4%BD%BF%E7%94%A8&spm=1018.2226)
