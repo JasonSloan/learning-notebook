@@ -110,7 +110,7 @@ Dockerfile：（**注意下面的trtpy set-key testkey中的testkey是假的，�
 ```bash
 FROM ubuntu:22.04
 
-# Install required dependencies
+# 安装一些包
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -119,51 +119,71 @@ RUN apt-get update && apt-get install -y \
     cmake \
     vim \
     openssh-server \
-    g++ 
+    g++ \
+    zip \
+    unzip 
 
-# Install Miniconda
+
+# 安装 OpenCV
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libopencv-dev
+
+# 安装 Miniconda
 ENV CONDA_DIR=/root/software/miniconda3
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-x86_64.sh -O /root/miniconda3.sh && \
-    /bin/bash /root/miniconda3.sh -b -p $CONDA_DIR && \
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-x86_64.sh -O /root/miniconda3.sh
+RUN /bin/bash /root/miniconda3.sh -b -p $CONDA_DIR && \
     rm -rf /root/miniconda3.sh && \
     export PATH="/root/software/miniconda3/bin:$PATH"
 
+# 设置环境变量
 ENV PATH="/root/software/miniconda3/bin:$PATH"
 
-# Configure Conda channels
+# 配置 Conda 镜像源
 RUN conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ && \
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ && \
     conda config --set show_channel_urls yes
 
-# Create Conda environment 'trtpy'
-RUN conda create -y --name trtpy python=3.9
+# 创建trtpy环境,安装trtpy
+RUN /root/software/miniconda3/bin/conda run -n base pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+    /root/software/miniconda3/bin/conda run -n base pip install trtpy -U 
 
-# Configure pip for 'trtpy' environment
-RUN /root/software/miniconda3/bin/conda run -n trtpy pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
-    /root/software/miniconda3/bin/conda run -n trtpy pip install trtpy -U && \
-    echo alias trtpy=\"python -m trtpy\" >> ~/.bashrc && \
-    /bin/bash -c "source ~/.bashrc"  && \
-    /root/software/miniconda3/bin/conda run -n trtpy python -m trtpy set-key testkey && \
-    /root/software/miniconda3/bin/conda run -n trtpy python -m trtpy get-env
+# 设置trtpy密钥,使用trtpy配置CUDA,TensorRT环境
+RUN /root/software/miniconda3/bin/conda run -n base python -m trtpy set-key testkey && \
+    /root/software/miniconda3/bin/conda run -n base python -m trtpy get-env
 
+# 安装 PyTorch, TorchVision, OpenCV
 RUN /root/software/miniconda3/bin/conda run -n base pip install torch torchvision opencv-python
 
-# Initialize Bash for Conda
+# 初始化 Conda
 RUN conda init bash
 
-# Set the root password
+# 设置root密码
 RUN echo 'root:111111' | chpasswd
 
-# install opencv
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libopencv-dev
-
-# Install SSH
+# 配置ssh,使其可以使用root用户登录
 RUN mkdir /var/run/sshd && \
     echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
+# 配置环境变量,使其每次开启容器时自动启动ssh服务
 RUN echo "/etc/init.d/ssh start" >> ~/.bashrc && \
     /bin/bash -c "source ~/.bashrc" 
+
+# 安装fastgithub
+RUN wget https://github.com/JasonSloan/learning-notebook/releases/download/v1/fastgithub_linux-x64.zip -O /root/software/fastgithub_linux.zip && \
+    cd /root/software && \
+    unzip fastgithub_linux.zip && \
+    rm -rf fastgithub_linux.zip 
+
+# 配置环境变量,使其每次开启容器时自动启动fastgithub
+RUN echo "cd /root/software/fastgithub_linux-x64 && nohup ./fastgithub >/dev/null 2>log &" >> ~/.bashrc && \
+    /bin/bash -c "source ~/.bashrc" 
+
+# 为git添加代理
+RUN git config --global http.proxy http://127.0.0.1:38457
+
+# 简化python -m trtpy启动命令为trtpy
+RUN echo alias trtpy=\"python -m trtpy\" >> ~/.bashrc 
 
 # CMD
 CMD ["/bin/bash"]
