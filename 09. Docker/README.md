@@ -92,7 +92,7 @@ push到远程仓库，push前必须tag，所以push的时候就不用指定是�
 docker push jasonsloan/face_detection:v1
 ```
 
-## 4. 一个可以打包Ubuntu、trtpy、cuda、tensorrt、anaconda、pytorch、OpenCV环境的Dockerfile
+## 4. 一个可以打包Ubuntu、trtpy、cuda、tensorrt、anaconda、pytorch、OpenCV环境,配置git代理的Dockerfile
 
 ```bash
 使用方法：
