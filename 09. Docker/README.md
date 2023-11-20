@@ -235,3 +235,9 @@ sudo service docker restart
 sudo docker start {hash_of_the_container}
 ```
 
+## 6. 查询已运行容器的内在的IP
+
+```bash
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' containerID
+```
+
