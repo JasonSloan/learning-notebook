@@ -30,10 +30,7 @@
 
 主要是熟悉一下如何使用python调用linux命令
 
-# 9. train_test_split.py
+# 9. image_rectify.py
 
-按照比例划分数据集
+图像校正
 
-# 10. logger.py
-
-python日志，随取随用
