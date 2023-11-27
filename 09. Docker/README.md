@@ -81,7 +81,7 @@ pip install ...
 Dockerfile制作完成后开始build编译，将当前文件夹下所有文件编译成名为face_detection的镜像
 docker build -t face_detection:v1 .
 编译结束运行看是否有错误，8080是本地端口，22是容器端口
-docker run --privileged -it --name face -p 8080:22 face_detection:v1  // 当需要使用gpu的时候，需要指定参数--gpus all
+docker run --privileged --shm-size=4g -it --name face --gpus all -p 8080:22 face_detection:v1  // 当需要使用gpu的时候，需要指定参数--gpus all; 指定shm-size,在容器中使用df -h可以看到shm的值为8G,否则默认为64M,太小不够用
 启动容器
 sudo docker start face
 查看CONTAINER ID
