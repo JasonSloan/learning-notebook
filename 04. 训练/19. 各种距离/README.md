@@ -83,7 +83,7 @@ cosine_distances = cdist(points1, points2, metric='cosine')
 
 两个概率分布间差异的**非对称性度量**
 
-![](assets/kl.jpg)
+![](assets/KL.jpg)
 
 ```python
 # 代码实现
