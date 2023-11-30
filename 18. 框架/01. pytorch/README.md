@@ -5,7 +5,7 @@ import torch
 import torch_npu  #1.8.1及以上需要
 
 # torch.cuda.is_available()
-torch.npu.is_availabel()
+torch.npu.is_available()
 
 # device = torch.device('cuda:0')
 # torch.cuda.set_device(device)
