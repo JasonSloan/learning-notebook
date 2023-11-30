@@ -35,3 +35,15 @@ pass
 ![](assets/vis_filter-level.png)
 
 ![](assets/vis_channel-level.png)
+
+# 五. 修剪标准
+
+1. 基于权重大小的剪枝
+
+2. 基于梯度幅值的剪枝(不合理,因为反向传播时梯度值较小不代表权重值不重要,有可能已经更新到最优的权重值了)
+
+3. 基于权重与梯度幅值乘积的剪枝
+
+   代码: weight_grad_product_pruning.py
+
+
