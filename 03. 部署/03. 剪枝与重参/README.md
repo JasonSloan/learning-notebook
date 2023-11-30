@@ -47,3 +47,13 @@ pass
    代码: weight_grad_product_pruning.py
 
 
+# 六. 几种剪枝框架
+
+## 1. 训练-->剪枝-->微调
+
+代码: train-prune-finetune.py
+
+## 2. 边训练边剪枝
+
+代码: pruning-with-training.py
+
