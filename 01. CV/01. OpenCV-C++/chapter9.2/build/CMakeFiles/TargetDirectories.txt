@@ -1,3 +1,0 @@
-/root/opencv/chapter9.2/build/CMakeFiles/pro.dir
-/root/opencv/chapter9.2/build/CMakeFiles/edit_cache.dir
-/root/opencv/chapter9.2/build/CMakeFiles/rebuild_cache.dir
