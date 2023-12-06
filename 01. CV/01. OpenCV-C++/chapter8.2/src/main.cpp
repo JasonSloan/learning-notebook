@@ -54,7 +54,7 @@
 // };
 
 int main() {
-    // 乱七八糟的，这一章节skip
+    // 乱七八糟的，这一章节skip, Harris角点检测不具有尺度不变性, 所以了解即可
     cv::Mat image = cv::imread("../workspace/corner.png", cv::IMREAD_GRAYSCALE);
     // 检测 Harris 角点
     cv::Mat cornerStrength;
