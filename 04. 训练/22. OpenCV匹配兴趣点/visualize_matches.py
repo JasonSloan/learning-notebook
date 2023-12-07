@@ -7,6 +7,23 @@ BINDINGS = {
     "BRISK": cv2.BRISK_create(),                # 具有方向不变性和尺度不变性        二值描述子
 }
 
+VALID_COMBINATIONS = [
+        ["SIFT", "SIFT", "cv"],
+        ["SIFT", "SIFT", "ratio"],
+        ["SIFT", "BRISK", "cv"],
+        ["SIFT", "BRISK", "ratio"],
+        ["BRISK", "SIFT", "cv"],
+        ["BRISK", "SIFT", "ratio"],
+        ["BRISK", "BRISK", "cv"],
+        ["BRISK", "BRISK", "ratio"],
+        ["BRISK", "ORB", "cv"],
+        ["BRISK", "ORB", "ratio"],
+        ["ORB", "BRISK", "cv"],
+        ["ORB", "BRISK", "ratio"],
+        ["ORB", "ORB", "cv"],
+        ["ORB", "ORB", "ratio"]
+    ]
+
 
 def select_matcher(optimize_method_name, descriptor_name, args=[]):
     if args and not isinstance(args, list):
@@ -52,27 +69,27 @@ def detect_and_visualize_keypoints(img1, img2, detector_name, descriptor_name, o
 if __name__ == "__main__":
     img1 = cv2.imread("/root/study/opencv/workspace/1.jpg", 1)
     img2 = cv2.imread("/root/study/opencv/workspace/2.jpg", 1)
-    valid_detector_names = ["SIFT",  "BRISK"]
-    valid_descriptor_names = ["SIFT", "BRISK"]
-    valid_optimize_method_names = ["cv", "ratio"]
-    
-    for detector_name in valid_detector_names:
-        for descriptor_name in valid_descriptor_names:
-            for optimize_method_name in valid_optimize_method_names:
-                if optimize_method_name == "ratio":
-                    args = [2]
-                elif optimize_method_name == "threashold":
-                    args = [0.4]
-                else:
-                    args = []
-                detect_and_visualize_keypoints(
-                    img1=img1, 
-                    img2=img2, 
-                    detector_name=detector_name, 
-                    descriptor_name=descriptor_name, 
-                    optimize_method_name=optimize_method_name, 
-                    optimize_method_args=args,
-                    num_matches_to_visualize=10
-                    )
+    for (detector_name, descriptor_name, optimize_method_name) in VALID_COMBINATIONS:
+        if optimize_method_name == "ratio":
+            args = [2]
+        elif optimize_method_name == "threashold":
+            args = [0.4]
+        else:
+            args = []
+        try:
+            detect_and_visualize_keypoints(
+                img1=img1, 
+                img2=img2, 
+                detector_name=detector_name, 
+                descriptor_name=descriptor_name, 
+                optimize_method_name=optimize_method_name, 
+                optimize_method_args=args,
+                num_matches_to_visualize=10
+                )
+        except Exception as e:
+            print(f"{detector_name}_{descriptor_name}_{optimize_method_name}: Not done!")
+        else:
+            print(f"{detector_name}_{descriptor_name}_{optimize_method_name}: Done!")
+            
 
 
