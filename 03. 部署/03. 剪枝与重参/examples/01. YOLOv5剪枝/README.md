@@ -1,3 +1,4 @@
+完整代码: https://github.com/midasklr/yolov5prune
 # 一. 正则化
 
 从均方误差损失(MSE)函数入手，神经网络学习的过程就是最小化损失函数，如下:
