@@ -1,3 +1,5 @@
+## 0, Remote-SSH
+
 ## 1, C/C++ ; C/C++ Extension Pack
 
 ## 2, Python; Pylance; 
@@ -27,3 +29,8 @@ python中输入"""自动添加函数格式化文档
 在linux下也可以在debug过程中可视化图片
 
 ![](assets/view_image.jpg)
+
+##  6, TONGYI Lingma
+
+类似于copilot, 免费版, 效果差点
+
