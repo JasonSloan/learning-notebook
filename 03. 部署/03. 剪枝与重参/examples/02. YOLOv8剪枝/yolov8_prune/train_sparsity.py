@@ -1,0 +1,10 @@
+"""
+修改的代码:
+ultralytics/engine/trainer.py: 禁用amp, 增加梯度惩罚项系数
+ultralytics/engine/model.py: 主要是将sr参数绑定到self.trainer上
+"""
+from ultralytics import YOLO
+
+model = YOLO("yolov8s.yaml")
+# L1正则的惩罚项系数sr=0.02
+model.train(data="coco128.yaml", epochs=50, sr=0.02)
