@@ -1,29 +1,14 @@
-# OpenCV-Cplusplus
-This is an OpenCV-C++ learning repo. The code is based on the pdf file named "OpenCV programming guide".The code can be run directly by cmake.
+ 
+## 编译安装OpenCV
 
-Install OpenCV with ubuntu command:
+        安装cmake:  apt-get install cmake
 
-```bash
-sudo apt update
-sudo apt-get install -y libopencv-dev
-```
+        安装依赖: apt-get install build-essential libgtk2.0-dev libavcodec-dev libavformat-dev libjpeg.dev libtiff5.dev libswscale-dev
 
-# Requirements
-Mine is :    
-ubuntu platform 20.04    
-gcc 9.3.0    
-cmake 3.16.3    
-opencv 4.2.0    
-IDE vscode    
-I dont know it will work on other platform or not......    
+        下载OpenCV4.6.0: 链接：https://pan.baidu.com/s/1OuFZNub5VGMsoF8oOSNxjQ  提取码：5tgz
 
-# How to use?
-Step1 : Clone the repo to your server  
-Step2 : cd a chapter folder  
-Step3 : Run command "sh compile_and_run.sh", then you will compile the current chapter folder's source code and run the excecutable file named mainproject. The result will be saved in the workspace folder which may not exist in every chapter if it is not needed.  
+        解压进入opencv4.6.0文件夹,创建build文件夹, 进入build文件夹, 执行cmake, 执行make, 执行make install
 
-eg :   
-    git clone https://github.com/JasonSloan/OpenCV-Cplusplus.git  
-    cd chapter1.3  
-    sh compile_and_run.sh  
-    ...Then you can check out the result or review the source code freely...  
+        在/etc/ld.so.conf.d下创建文件OpenCV.conf, 写入"/usr/local/lib", 保存退出执行sudo ldconfig, 使opencv的动态库可以被系统链接到
+
+        编写main.cpp, 验证opencv是否好用
