@@ -81,6 +81,9 @@ class BaseTrainer:
             overrides (dict, optional): Configuration overrides. Defaults to None.
         """
         self.args = get_cfg(cfg, overrides)
+        # ========================================
+        self.finetune = self.args.finetune
+        # ========================================
         self.check_resume(overrides)
         self.device = select_device(self.args.device, self.args.batch)
         self.validator = None
@@ -354,9 +357,9 @@ class BaseTrainer:
                 self.scaler.scale(self.loss).backward()
                 
                 # # ============================= sparsity training ========================== #
-                # 不加L1正则的bn层为: 所有C3模块中的第一个卷积层的bn层, 以及C3模块中的BottleNeck模块中的所有卷积层
-                srtmp = self.sr * (1 - 0.9 * self.epoch / self.epochs)  # 线性衰减的L1正则化系数
-                if self.sr:
+                if self.sr is not None:
+                    # 不加L1正则的bn层为: 所有C3模块中的第一个卷积层的bn层, 以及C3模块中的BottleNeck模块中的所有卷积层
+                    srtmp = self.sr * (1 - 0.9 * self.epoch / self.epochs)  # 线性衰减的L1正则化系数
                     ignore_bn_list = []
                     for k, m in self.model.named_modules():
                         if isinstance(m, Bottleneck):

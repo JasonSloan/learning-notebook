@@ -128,7 +128,7 @@ class BaseModel(nn.Module):
             (nn.Module): The fused model is returned.
         """
         if not self.is_fused():
-            for m in self.model.modules():
+            for name, m in self.model.named_modules():
                 if isinstance(m, (Conv, Conv2, DWConv)) and hasattr(m, 'bn'):
                     if isinstance(m, Conv2):
                         m.fuse_convs()

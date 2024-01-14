@@ -14,7 +14,6 @@ from ultralytics.utils.torch_utils import de_parallel, torch_distributed_zero_fi
 
 from ultralytics.nn.tasks_pruned import DetectionModelPruned
 
-
 class DetectionTrainer(BaseTrainer):
     """
     A class extending the BaseTrainer class for training based on a detection model.
@@ -68,15 +67,9 @@ class DetectionTrainer(BaseTrainer):
         self.model.args = self.args  # attach hyperparameters to model
         # TODO: self.model.class_weights = labels_to_class_weights(dataset.labels, nc).to(device) * nc
 
-    def get_model(self, cfg=None, weights=None, verbose=True, maskbndict=None):
+    def get_model(self, cfg=None, weights=None, verbose=True):
         """Return a YOLO detection model."""
-        # ===========================================================================
-        if self.finetune:
-            assert maskbndict is not None, "maskbndict must be stored in weights so that it can be loaded for finetuing"
-            model = DetectionModelPruned(maskbndict, cfg, nc=self.data['nc'], verbose=verbose and RANK == -1)
-        else:
-            model = DetectionModel(cfg, nc=self.data['nc'], verbose=verbose and RANK == -1)
-        # ===========================================================================
+        model = DetectionModelPruned(cfg, nc=self.data['nc'], verbose=verbose and RANK == -1)
         if weights:
             model.load(weights)
         return model

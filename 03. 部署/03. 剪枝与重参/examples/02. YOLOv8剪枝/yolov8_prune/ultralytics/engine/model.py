@@ -349,7 +349,7 @@ class Model(nn.Module):
             args['resume'] = self.ckpt_path
         # ====================================================
         sr = args.get("sr", None)
-        if sr:
+        if sr is not None:
             args.pop("sr")
         # ====================================================
         self.trainer = (trainer or self._smart_load('trainer'))(overrides=args, _callbacks=self.callbacks)
@@ -357,7 +357,10 @@ class Model(nn.Module):
         self.trainer.sr = sr
         # ====================================================
         if not args.get('resume'):  # manually set model only if not resuming
-            self.trainer.model = self.trainer.get_model(weights=self.model if self.ckpt else None, cfg=self.model.yaml)
+            # ========================================================================================================
+            maskbndict = self.ckpt.get('maskbndict', None) if self.ckpt else None
+            self.trainer.model = self.trainer.get_model(weights=self.model if self.ckpt else None, cfg=self.model.yaml, maskbndict=maskbndict)
+            # ========================================================================================================
             self.model = self.trainer.model
         self.trainer.hub_session = self.session  # attach optional HUB session
         self.trainer.train()

@@ -72,8 +72,7 @@ CFG_INT_KEYS = ('epochs', 'patience', 'batch', 'workers', 'seed', 'close_mosaic'
 CFG_BOOL_KEYS = ('save', 'exist_ok', 'verbose', 'deterministic', 'single_cls', 'rect', 'cos_lr', 'overlap_mask', 'val',
                  'save_json', 'save_hybrid', 'half', 'dnn', 'plots', 'show', 'save_txt', 'save_conf', 'save_crop',
                  'save_frames', 'show_labels', 'show_conf', 'visualize', 'augment', 'agnostic_nms', 'retina_masks',
-                 'show_boxes', 'keras', 'optimize', 'int8', 'dynamic', 'simplify', 'nms', 'profile')
-
+                 'show_boxes', 'keras', 'optimize', 'int8', 'dynamic', 'simplify', 'nms', 'profile', 'finetune')
 
 def cfg2dict(cfg):
     """
@@ -108,9 +107,15 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
     # Merge overrides
     if overrides:
         overrides = cfg2dict(overrides)
+        # =================================================
+        finetune = overrides.pop('finetune', None)
+        # =================================================
         if 'save_dir' not in cfg:
             overrides.pop('save_dir', None)  # special override keys to ignore
         check_dict_alignment(cfg, overrides)
+        # =================================================
+        overrides['finetune'] = finetune
+        # =================================================
         cfg = {**cfg, **overrides}  # merge cfg and overrides dicts (prefer overrides)
 
     # Special handling for numeric project/name
@@ -140,7 +145,9 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
             elif k in CFG_BOOL_KEYS and not isinstance(v, bool):
                 raise TypeError(f"'{k}={v}' is of invalid type {type(v).__name__}. "
                                 f"'{k}' must be a bool (i.e. '{k}=True' or '{k}=False')")
-
+    # ==================================
+    cfg['finetune'] = finetune
+    # ==================================
     # Return instance
     return IterableSimpleNamespace(**cfg)
 
