@@ -141,7 +141,7 @@ model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, finetune=T
 
 
 
-使用val.py进行验证, 使用export.py导出为onnx......
+### 使用val.py进行验证, 使用export.py导出为onnx......
 
 
 
