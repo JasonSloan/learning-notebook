@@ -197,7 +197,7 @@ Speed: 3.7ms preprocess, 1.1ms inference, 0.0ms loss, 0.5ms postprocess per imag
 | 60%  |   12M    |
 | 80%  |   7.7M   |
 
-通过以上例子, 可以看出, 在剪枝20%, 40%时, mAP50甚至还有提升, 剪枝60%时, mAP50不变
+**通过以上例子, 可以看出, 在剪枝20%, 40%时, mAP50甚至还有提升, 剪枝60%时, mAP50不变**
 
 
 
