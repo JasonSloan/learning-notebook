@@ -34,11 +34,7 @@ m^3^(^)
 
 <www.baidu.com>(<超链接>)
 
-![网上的图片](图片网址www.xxx.com)
-
-
-
-![本地图片](dog.jpg)（需要放在一个文件夹）
+![](assets/pic.jpg)
 
 
 
