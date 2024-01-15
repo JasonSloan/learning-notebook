@@ -66,7 +66,7 @@ BN层的具体操作有两部分：
 
 下载本仓库的代码, 在本仓库中除了YOLOv8的官方代码, 还包含train.py、train_sparsity.py、prune.py、finetune.py、val.py
 
-这里在某个数据集上实验。
+这里在某个单类别检测数据集上实验(其他数据集同理)。
 
 ### 首先使用train.py进行正常训练:
 
