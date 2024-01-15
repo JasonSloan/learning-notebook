@@ -189,21 +189,13 @@ Model summary (fused): 168 layers, 3039249 parameters, 0 gradients, 11.3 GFLOPs
 Speed: 3.7ms preprocess, 1.1ms inference, 0.0ms loss, 0.5ms postprocess per image
 ```
 
-
-
-​				**onnx文件大小**                		 **剪枝比例**
-
-​				    43M                                       		原
-
-​				    29M                                       	       20%
-
-​				    19M                                       	       40%
-
-​				    12M                                       	       60%
-
-​				    7.7M                                      	       80%
-
-
+| 剪枝比例 | onnx文件大小 |
+| :--: | :------: |
+|  0%  |   43M    |
+| 20%  |   29M    |
+| 40%  |   19M    |
+| 60%  |   12M    |
+| 80%  |   7.7M   |
 
 通过以上例子, 可以看出, 在剪枝20%, 40%时, mAP50甚至还有提升, 剪枝60%时, mAP50不变
 
