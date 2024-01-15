@@ -22,7 +22,7 @@ reference: https://github.com/midasklr/yolov5prune
 
 BN层的具体操作有两部分：
 
-![](assets/bn_formula.jpg)
+![](assets/BN_formula.jpg)
 
 在归一化后会进行线性变换，那么当系数gamma很小时候，对应的激活（Zout）会相应很小。这些响应很小的输出可以裁剪掉，这样就实现了bn层的通道剪枝。
 
