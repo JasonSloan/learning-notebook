@@ -68,13 +68,13 @@ BN层的具体操作有两部分：
 
 这里在某个数据集上实验。
 
-首先使用train.py进行正常训练:
+### 首先使用train.py进行正常训练:
 
 ```python
 from ultralytics import YOLO
 
 model = YOLO("weights/yolov8s.pt")
-# L1正则的惩罚项系数sr=0.02
+# L1正则的惩罚项系数sr=0
 model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, sr=0)
 ```
 
@@ -88,7 +88,7 @@ model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, sr=0)
 
 
 
-然后使用train_sparsity.py稀疏训练：
+### 然后使用train_sparsity.py稀疏训练：
 
 ```python
 from ultralytics import YOLO
@@ -104,7 +104,7 @@ model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=100, sr=0.02)
 
 
 
-训练完成后使用prune.py进行剪枝, 代码详见prune.py:
+### 训练完成后使用prune.py进行剪枝, 代码详见prune.py:
 
 ```python
 def parse_opt():
@@ -125,7 +125,7 @@ def parse_opt():
 
 
 
-使用finetune.py进行微调：
+### 使用finetune.py进行微调：
 
 ```python
 from ultralytics import YOLO
