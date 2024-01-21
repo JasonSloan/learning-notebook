@@ -4,11 +4,17 @@ RANSAC(RANdom SAmple Consensus,随机采样一致)算法是从一组含有“外
 
 对于RANSAC算法来说一个基本的假设就是数据是由“内点”和“外点”组成的。“内点”就是组成模型参数的数据，“外点”就是不适合模型的数据。同时RANSAC假设：在给定一组含有少部分“内点”的数据，存在一个程序可以估计出符合“内点”的模型。
 
+**RANSAC优点: 只要噪声是杂乱无章的，哪怕噪声占比比较大，也能够很好地去噪**
+
+**RANSAC缺点: 如果噪声是有序的, 那么很可能使用RANSAC拟合时模型会趋向于拟合噪声**
+
+**与最小二乘法区别:最小二乘法是用所有的观测值去拟合模型, 仅适用于噪声占比比较小的情况**
+
 ![](assets/inner_outer.jpg)
 
 ## 二. RANSAC算法流程
 
-1.随机取一组点model points, 求解出模型方程, model points为求取模型的最小点数;
+1.随机取一组点num_points, 求解出模型方程, num_points为求取模型的最小点数;
 
 2.计算满足该模型方程的点数占总点数的比例(即内点占比) ;
 
@@ -59,17 +65,17 @@ RANSAC(RANdom SAmple Consensus,随机采样一致)算法是从一组含有“外
 
 ​	因此公式如下:
 
-​		④迭代1次取到Model_S模型的概率: $\mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{model\_points}}$
+​		④迭代1次取到Model_S模型的概率: $\mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}}$
 
-​		③迭代1次取到非Model_S模型的概率: $1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{model\_points}}$
+​		③迭代1次取到非Model_S模型的概率: $1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}}$
 
-​		②迭代iter次后, 每次都取到非Model_S模型的概率: $\mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{model\_points}} \mathclose{}\right)^{\mathrm{iter}}$
+​		②迭代iter次后, 每次都取到非Model_S模型的概率: $\mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$
 
-​		①迭代iter次后, 至少一次能求取到当前模型Model_S的概率: $1 - \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{model\_points}} \mathclose{}\right)^{\mathrm{iter}}$
+​		①迭代iter次后, 至少一次能求取到当前模型Model_S的概率: $1 - \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$
 
-​	令: $1 - \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{model\_points}} \mathclose{}\right)^{\mathrm{iter}}$ > p
+​	令: $1 - \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$ > p
 
-​	可得: $\mathrm{iter} >= \frac{\log \mathopen{}\left( 1 - p \mathclose{}\right)}{\log \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{model\_points}} \mathclose{}\right)}$
+​	可得: $\mathrm{iter} >= \frac{\log \mathopen{}\left( 1 - p \mathclose{}\right)}{\log \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)}$
 
 ​	其中iter最大迭代次数, p是置信度概率, ep是内点占比, model_points是求取模型所需的最小的点对数
 
