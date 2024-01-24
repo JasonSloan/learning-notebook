@@ -79,6 +79,6 @@
 
    打开Matlab, 输入cameraCalibrator----> 选择棋盘格图片----> 输入标定板中每个黑(白)单元格的面积 ----> 点击确定, 等待Matlab添加图片----> 点击options----> 勾选需要的参数(2阶径向畸变, 3阶径向畸变, 切向畸变, 偏度)----> 点击Calibrate开始标定----> 点击Export Camera Parameters, 选择workspace----> 返回到Matlab主界面即可查看相机参数
 
-   ![](assets/calibrate1.jpg)
+   ![](assets/1.jpg)
 
-   ![](assets/calibrate2.jpg)![](assets/calibrate3.jpg)![](assets/calibrate4.jpg)![](assets/calibrate5.jpg)![](assets/calibrate6.jpg)
+   ![](assets/2.jpg)![](assets/3.jpg)![](assets/4.jpg)![](assets/5.jpg)![](assets/6.jpg)
