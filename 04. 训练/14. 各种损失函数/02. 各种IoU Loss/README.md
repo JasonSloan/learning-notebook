@@ -125,14 +125,16 @@ def bbox_iou(box1, box2, x1y1x2y2=True, GIoU=False, DIoU=False, CIoU=False, SIoU
             c_area = cw * ch + eps  # convex area
             return iou - (c_area - union) / c_area  # GIoU
     elif SIoU:  # SIoU Loss https://arxiv.org/pdf/2205.12740.pdf
-        s_cw = (b2_x1 + b2_x2 - b1_x1 - b1_x2) * 0.5 #真实框和预测框中心点的宽度差
-        s_ch = (b2_y1 + b2_y2 - b1_y1 - b1_y2) * 0.5 #真实框和预测框中心点的高度差
+        cw = torch.max(b1_x2, b2_x2) - torch.min(b1_x1, b2_x1)
+        ch = torch.max(b1_y2, b2_y2) - torch.min(b1_y1, b2_y1)
+        s_cw = (b2_x1 + b2_x2 - b1_x1 - b1_x2) * 0.5 # 真实框和预测框中心点的宽度差
+        s_ch = (b2_y1 + b2_y2 - b1_y1 - b1_y2) * 0.5 # 真实框和预测框中心点的高度差
         sigma = torch.pow(s_cw ** 2 + s_ch ** 2, 0.5) #真实框和预测框中心点的距离
         sin_alpha_1 = torch.abs(s_cw) / sigma #真实框和预测框中心点的夹角β
         sin_alpha_2 = torch.abs(s_ch) / sigma #真实框和预测框中心点的夹角α
         threshold = pow(2, 0.5) / 2 #夹角阈值
         sin_alpha = torch.where(sin_alpha_1 > threshold, sin_alpha_2, sin_alpha_1) #α大于45°则考虑优化β，否则优化α
-        angle_cost = torch.cos(torch.arcsin(sin_alpha) * 2 - math.pi / 2) #角度损失
+        angle_cost = torch.cos(torch.arcsin(sin_alpha) * 2 - math.pi / 2)  # 角度损失
         rho_x = (s_cw / cw) ** 2 
         rho_y = (s_ch / ch) ** 2
         gamma = angle_cost - 2
