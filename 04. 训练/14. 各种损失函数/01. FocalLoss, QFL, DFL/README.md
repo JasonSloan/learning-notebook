@@ -1,5 +1,7 @@
 ## 一. FL(Focal Loss)
 
+**代码见本文件夹内**
+
 Focal Loss 的引入主要是为了解决难易样本数量不平衡（注意, 有区别于正负样本数量不平衡）的问题, 实际可以使用的范围非常广泛。比如单阶段的目标检测器通常会产生高达 100 k 的候选目标，只有极少数是正样本，正负样本数量非常不平衡。在计算分类的时候常用的损失一一交叉熵的公式如下:
 
 ![](assets/fl1.jpg)
@@ -30,11 +32,15 @@ Focal Loss 的引入主要是为了解决难易样本数量不平衡（注意, �
 
 ## 二. QFL
 
-参考:https://zhuanlan.zhihu.com/p/147691786
+参考链接写的很好, 先看参考链接:https://zhuanlan.zhihu.com/p/147691786
+
+**代码见本文件夹内**
 
 ## 三. DFL
 
-参考:https://zhuanlan.zhihu.com/p/147691786
+参考链接写的很好, 先看参考链接:https://zhuanlan.zhihu.com/p/147691786
+
+**代码见本文件夹内**
 
 模型在预测边框的大小时, 不再预测xywh而是预测ltrb(left top right bottom), 也就是预测最后大中小三个特征图中每个单元格中心点到边框的四个边的距离, 而这个距离也不是直接预测的, 而是预测16(16这个数可调)个值。
 
@@ -59,26 +65,7 @@ dist = torch.sum(reg * indexes)			# 概率乘以索引求和即是某一边距�
 
 例如, 某目标的中心点(这里待确认, 是像YOLOv5一样, 某个物体的中心点落在某个单元格内, 就由该单元格负责预测该中心点)落在中心点坐标为(4.5, 8.5)的单元格中, 该目标边框的左边距离中心点偏移为2.3, 那么在就要让这16个预测概率的第2个位置和第3个位置的值最大尽量接近1	, 也就是优化目标是[0, 0, 1, 1, 0, 0, 0......]
 
-```python
-def dfl_loss(pred_dist, target):
-    """Return sum of left and right DFL losses.
 
-    Args:
-        pred_dist (Tensor): shape: [4*?, 16], 4代表边框的4个边, ?代表有物体的单元格的个数, 16代表着16个位置的概率
-        target (Tensor): shape: [?, 4], ?代表有物体的单元格的个数, 4代表着边框的4个边
-
-    Returns:
-        loss: shape: [?, 1], ?代表有物体的单元格的个数
-    """
-    # Distribution Focal Loss (DFL) proposed in Generalized Focal Loss https://ieeexplore.ieee.org/document/9792391
-    tl = target.long()  # target left, 真实框距离单元格中心点位置的左侧(上侧)索引
-    tr = tl + 1         # target right, 真实框距离单元格中心点位置的右侧(下侧)索引
-    wl = tr - target    # weight left, 左侧权重
-    wr = 1 - wl         # weight right, 右侧权重
-    # 多标签交叉熵损失, 使16个预测概率的第tl和tr两个位置的概率最大
-    return (F.cross_entropy(pred_dist, tl.view(-1), reduction='none').view(tl.shape) * wl +
-            F.cross_entropy(pred_dist, tr.view(-1), reduction='none').view(tl.shape) * wr).mean(-1, keepdim=True)
-```
 
 
 
