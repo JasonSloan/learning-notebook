@@ -21,7 +21,7 @@ def multi_label_loss_bce(preds, targets):
     return loss
 
 def multi_label_loss_bce_with_logits(preds, targets):
-    """内置sigmoid的多标签损失函数, 官方推荐
+    """内置sigmoid的多标签损失函数
 
     Args:
         preds (_type_): _description_
@@ -44,15 +44,9 @@ def multi_label_loss_custom(preds, targets):
     Returns:
         _type_: _description_
     """
-    batch_size, classes = targets.shape
-    loss = 0
-    for i in range(batch_size):
-        for j in range(classes):
-            preds_sigmoid = preds[i][j].sigmoid()
-            if targets[i][j] == 1:
-                loss += torch.log(preds_sigmoid)
-            else:
-                loss += torch.log(1 - preds_sigmoid)
+    preds = preds.sigmoid()
+    eps = 1e-6
+    loss = torch.sum(targets * torch.log(preds + eps) + (1 - targets) * torch.log(1 - preds + eps))
     return -loss  
 
 
@@ -70,5 +64,6 @@ if __name__ == "__main__":
 
     loss_custom = multi_label_loss_custom(preds, targets)
     print("Custom Multi-Label Loss:", loss_custom.item())
+
 ```
 
