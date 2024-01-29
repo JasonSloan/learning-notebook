@@ -53,6 +53,7 @@ if __name__ == '__main__':
     ]
     last_three_feature_maps = [xi.view(1, 64, -1) for xi in last_three_feature_maps]        
     last_three_feature_maps = torch.cat(last_three_feature_maps, dim=2)                     # [1, 64, 8400]
+    # 注意在计算损失的时候是将两个softmax损失乘以对应的权重系数后相加, 并不是多标签损失
     pred_dist = last_three_feature_maps.view(1, -1, 4, 16).softmax(3)                       # [1, 8400, 4, 16]
     # # 如果是推理阶段, 就使用这个DFL类把16个距离转换成1个值, DFL类没有参数, 这么写可以方便的将这个后处理加入到整个网络中
     # dfl = DFL()
