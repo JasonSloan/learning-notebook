@@ -38,3 +38,10 @@ print(solve)
 
 [latexify-py更多用法](https://mp.weixin.qq.com/s/c-LPHhBY7yvzfen142Mhcw)
 
+
+
+## 使用智谱清言将截图转换成Latex
+
+https://chatglm.cn/main/detail
+
+![](assets/chatglm.jpg)
