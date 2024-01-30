@@ -145,7 +145,31 @@ if __name__ == "__main__":
     pool.join()
 ```
 
-## 7. JoinableQueue实现多进程之间的通信
+## 7. 进程池间数据共享
+
+```python
+from multiprocessing import Pool, Value
+
+def worker(index):
+    for _ in range(5):
+        with shared_value.get_lock():
+            shared_value.value += 1
+        print(f"Worker {index}: {shared_value.value}")
+
+if __name__ == "__main__":
+    # 'i' 代表属于整数integer
+    shared_value = Value('i', 0)  
+    pool_size = 3
+    pool = Pool(pool_size)
+    results = [pool.apply_async(worker, args=(i,)) for i in range(pool_size)]
+    pool.close()
+    pool.join()
+    print(f"Main: {shared_value.value}")
+```
+
+
+
+## 8. JoinableQueue实现多进程之间的通信
 
 多进程间的通信(JoinableQueue)
 task_done()：消费者使用此方法发出信号，表示q.get()的返回项目已经被处理。如果调用此方法的次数大于从队列中删除项目的数量，将引发ValueError异常
@@ -178,7 +202,7 @@ if __name__ == "__main__":
     print('主线程')
 ```
 
-## 8. 进程间数据共享(不常用)
+## 9. 进程间数据共享(不常用)
 
 进程间的数据共享(multiprocessing.Queue)(基本不用, 因为进程间本来就是资源独立的)
 
