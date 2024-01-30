@@ -167,7 +167,55 @@ if __name__ == "__main__":
     print(f"Main: {shared_value.value}")
 ```
 
+**注意: 进程池间数据共享, 传参时每个参数一定要是独立的**
 
+```python
+# 错误的写法
+from multiprocessing import Pool, Value
+
+class ID():
+    def __init__(self):
+        self.id = 0
+        
+def worker(id_cls):
+    print(f"Worker {id_cls.id}")
+
+if __name__ == "__main__":
+    pool_size = 3
+    pool = Pool(pool_size)
+    id_cls = ID()
+    for i in range(pool_size):
+        # 因为pool.apply_async是对id_cls进行引用, 所以worker调用的结果都是同一个值
+        id_cls.id = i
+        pool.apply_async(func=worker, args=(id_cls,))
+    pool.close()
+    pool.join()
+# 三次打印结果: Worker 2 Worker 2 Worker 2
+```
+
+```python
+# 正确的写法
+from multiprocessing import Pool, Value
+
+class ID():
+    def __init__(self):
+        self.id = 0
+        
+def worker(id_cls):
+    print(f"Worker {id_cls.id}")
+
+if __name__ == "__main__":
+    pool_size = 3
+    pool = Pool(pool_size)
+    for i in range(pool_size):
+        # 每一个进程都应该独占自己的ID类
+        id_cls = ID()
+        id_cls.id = i
+        pool.apply_async(func=worker, args=(id_cls,))
+    pool.close()
+    pool.join()
+# 三次打印结果: Worker 0 Worker 1 Worker 2
+```
 
 ## 8. JoinableQueue实现多进程之间的通信
 
