@@ -75,6 +75,8 @@
 
    # (II) 相机标定
 
+   张正友标定数学原理:<https://zhuanlan.zhihu.com/p/94244568>
+
    购买相机标定板, 拍摄棋盘格的图片 , 要求固定标定板的位置, 然后使用相机在各个位置和角度拍摄图片, 注意图片并不是越多越好, 20张以内效果最好
 
    打开Matlab, 输入cameraCalibrator----> 选择棋盘格图片----> 输入标定板中每个黑(白)单元格的面积 ----> 点击确定, 等待Matlab添加图片----> 点击options----> 勾选需要的参数(2阶径向畸变, 3阶径向畸变, 切向畸变, 偏度)----> 点击Calibrate开始标定----> 点击Export Camera Parameters, 选择workspace----> 返回到Matlab主界面即可查看相机参数
@@ -82,3 +84,4 @@
    ![](assets/1.jpg)
 
    ![](assets/2.jpg)![](assets/3.jpg)![](assets/4.jpg)![](assets/5.jpg)![](assets/6.jpg)
+
