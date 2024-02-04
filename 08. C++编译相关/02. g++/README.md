@@ -1,4 +1,6 @@
-```python
+# 一. g++基本使用
+
+```bash
 # 参考视频：https://www.bilibili.com/video/BV1fy4y1b7TC/?p=8&spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=2fa3840975cc19817a9a15ddf8a1a81b
 位于哔哩哔哩：收藏：g++、Cmake
 
@@ -51,4 +53,46 @@ g++ main.cpp -Iinclude -Lsrc -lswap -o main.out
 export LD_LIBRARY_PATH=~/study_C++/src:$LD_LIBRARY_PATH   # 给搜索路径添加~/study_C++/src，不指定直接执行会报错
 ./main.out
 ```
+
+## 二. 多版本g++切换
+
+**步骤一: 安装编译器**
+
+```bash
+sudo apt update
+sudo apt install build-essential
+sudo apt -y install g++-8 g++-9 g++-10
+```
+
+**步骤二：使用update-alternatives工具创建多个g++编译器选项**
+
+```c++
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+```
+
+**步骤三：使用update-alternatives工具改变默认编译器**
+
+```bash
+sudo update-alternatives --config g++
+There are 3 choices for the alternative g++ (providing /usr/bin/g++).
+
+  Selection    Path            Priority   Status
+------------------------------------------------------------
+* 0            /usr/bin/g++-9   9         auto mode
+  1            /usr/bin/g++-10  10         manual mode
+  2            /usr/bin/g++-8   8         manual mode
+  3            /usr/bin/g++-9   9         manual mode
+
+Press  to keep the current choice[*], or type selection number:
+```
+
+**步骤四：查看版本**
+
+```bash
+gcc --version
+```
+
+
 
