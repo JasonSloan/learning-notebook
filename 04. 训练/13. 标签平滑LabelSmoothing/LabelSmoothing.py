@@ -5,5 +5,5 @@ def smooth_BCE(eps=0.1):  # https://github.com/ultralytics/yolov3/issues/238#iss
 
 if __name__ == '__main__':
     # cp: positive, cn: negative
-    cp, cn = smooth_BCE(eps=0.95)
+    cp, cn = smooth_BCE(eps=0.1)
 
