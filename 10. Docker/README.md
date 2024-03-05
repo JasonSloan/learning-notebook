@@ -235,7 +235,11 @@ sudo service docker restart
 sudo docker start {hash_of_the_container}
 ```
 
-## 6. 查询已运行容器的内在的IP
+## 6. 给已运行的 docker 容器修改或增加目录映射
+
+[链接](https://blog.csdn.net/qq_39198749/article/details/127731024?ops_request_misc=&request_id=&biz_id=102&utm_term=%E7%BB%99%E5%B7%B2%E8%BF%90%E8%A1%8C%E7%9A%84%20docker%20%E5%AE%B9%E5%99%A8%E4%BF%AE%E6%94%B9%E6%88%96%E5%A2%9E%E5%8A%A0%E7%9B%AE%E5%BD%95%E6%98%A0%E5%B0%84&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-0-127731024.142^v99^pc_search_result_base6&spm=1018.2226.3001.4187)
+
+## 7. 查询已运行容器的内在的IP
 
 ```bash
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' containerID
