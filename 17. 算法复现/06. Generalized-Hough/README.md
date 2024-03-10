@@ -106,7 +106,37 @@ for angle in (min_rotate, max_rotate):
 
 对于待检测图片中的目标是**有缩放尺寸**的, 遍历时缩放系数后, R表对应向量直接乘以当前缩放系数即可
 
-**代码**见template-match.py(不带旋转和缩放)  ;  cpp文件夹内代码(带旋转和缩放)
+**代码**见python文件夹下的template-match.py(不带旋转和缩放)  ;  cpp文件夹内代码(带旋转和缩放)
+
+调用opencv的API:
+
+```python
+import cv2
+import numpy as np
+
+# Load the template and the image
+template = cv2.imread('images/tpl.jpg', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('images/target.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Create a Generalized Hough Transform object
+ght = cv2.GeneralizedHoughGuil()
+
+# Set the template
+ght.setTemplate(template)
+
+# Adjust parameters
+ght.setAngleStep(1)  # 1 degree angle step
+ght.setScaleStep(0.5)  # 0.5% scale step
+
+positions, votes = ght.detect(image)
+
+for position in positions:
+    x, y, scale, orientation = position
+
+cv2.imwrite("result.jpg", image)
+```
+
+
 
 **霍夫变换模板匹配的优缺点：**
 1.哪怕模板有些不连续的边缘，霍夫变换也是work的；因为我们无需固定的参数方式对其进行表达；
