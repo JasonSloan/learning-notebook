@@ -8,7 +8,7 @@ Learning Efficient Convolutional Networks Through Network Slimming（[https://ar
 
 Pruning Filters for Efficient ConvNets（[https://arxiv.org/abs/1608.08710）](https://arxiv.org/abs/1608.08710%EF%BC%89)
 
-reference: https://github.com/midasklr/yolov5prune
+Reference: https://github.com/midasklr/yolov5prune
 
 
 
