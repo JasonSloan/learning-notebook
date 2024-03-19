@@ -11,7 +11,7 @@ trtpy change-proj 1.2
 ```C++
 // 步骤：解码输出值（过滤低置信度的框，获取类别标签，逆仿射变换）-->NMS
 // decode box：从不同尺度下的预测框还原到原输入图上(包括:预测框，类被概率，置信度）
-vector<vector<float>> bboxes;      // 初始化变量bboxes:[[x1, y1, x2, y2, label, conf], [x1, y1, x2, y2, label, conf]...]
+vector<vector<float>> bboxes;      // 初始化变量bboxes:[[x1, y1, x2, y2, conf, label], [x1, y1, x2, y2, conf, label]...]
 float confidence_threshold = 0.25; // 置信度
 float nms_threshold = 0.5;         // iou阈值
 for (int i = 0; i < output_numbox; ++i)
