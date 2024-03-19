@@ -80,6 +80,11 @@ compiled_model_tf = ie.compile_model(model=model_tf, device_name="CPU")
 
 # 五. 模型转换
 
+```bash
+#=============0，使用命令行转换模型(推荐)============= 
+mo --input_model yolov5.onnx --input_shape [-1,3,384,640] --output_dir weights/ --compress_to_fp16=True
+```
+
 ```python
 #=============1，ONNX转换为IR模型=============
 from openvino.runtime import Core
