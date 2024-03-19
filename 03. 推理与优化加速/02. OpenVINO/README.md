@@ -4,9 +4,15 @@ ps:第111项YOLOv5量化int8
 
 # 一. 安装
 
+python版本安装:
+
 ```C++
 pip install openvino-dev[pytorch,onnx]
 ```
+
+cpp版本安装:
+
+按照[官网]( https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/download.html?VERSION=v_2023_3_0&OP_SYSTEM=LINUX&DISTRIBUTION=APT)步骤安装openvino(使用apt的方式安装2023版本的)
 
 # 二. OpenVINO流程
 
