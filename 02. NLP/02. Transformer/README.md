@@ -2,6 +2,8 @@
 
 [视频讲解链接](https://www.youtube.com/watch?v=ISNdQcPhsts&t=9595s)
 
+[代码实现](https://github.com/hkproj/pytorch-transformer)
+
 ![](assets/transformer.jpg)
 
 # 一. Encoder构建
@@ -419,10 +421,20 @@ def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int
             nn.init.xavier_uniform_(p)
             
     return transformer 
-    
 ```
 
+# 三、训练和推理流程
+
+SOS：start of the sentence
+
+EOS：end of the sentence
+
+训练过程如下，模型接受两个输入，输入1是原文，输入2是翻译后的文，预测为翻译后的文（注意输入2和预测之间差一个时序）
+
+![](assets/train.jpg)
 
 
 
+推理过程如下，输入1是原文，输入2先使用SOS，然后每次只推理出一个单词，然后将该单词作为输入再推理下一个单词，然后将SOS与预测出的单词作为输入2连同输入1再次输入到模型中预测，循环往复，直到超过最大允许token长度或者遇到EOS为止。这也就是为什么transformer计算量大的原因，因为在推理过程中transformer要调用很多次decoder解码器进行计算
 
+![](assets/infer.jpg)
