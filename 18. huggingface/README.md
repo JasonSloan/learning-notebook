@@ -1,5 +1,7 @@
 # 一. huggingface快速测试一个模型的方法
 
+![](assets/download.jpg)
+
 下载Files and Versions中所有的文件放入一个新建的文件夹models中
 
 pip install 所有的依赖,运行模型并指定刚才下载的文件所在文件夹即可,例如:
