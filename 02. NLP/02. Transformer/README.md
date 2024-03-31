@@ -431,6 +431,8 @@ EOS：end of the sentence
 
 训练过程如下，模型接受两个输入，输入1是原文，输入2是翻译后的文，预测为翻译后的文（注意输入2和预测之间差一个时序）
 
+因为有**decoder_mask**的存在(decoder_mask是一个维度seq_len*seq_len的下三角全部为1且对角也全部为1的掩码矩阵），所以实际上是    输入1全部+输入2的SOS---->预测"I"   输入1全部+输入2的SOS+I---->预测"have"    输入1全部+输入2的SOS+I+have---->预测"a"......
+
 ![](assets/train.jpg)
 
 
