@@ -17,6 +17,12 @@ response, history = model.chat(tokenizer, "晚上睡不着应该怎么办", hist
 print(response)
 ```
 
+可以使下载加速的国内镜像设置方法：
+
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+```
+
 
 
 
