@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Linux", // 不用变
+            "includePath": [
+                "${workspaceFolder}/**", // 不用变
+                "/root/work/yolov5-deploy/include",  // 把这句改一下
+                "/root/work/yolov5-deploy/include/**",
+                "/root/work/yolov5-deploy/src/rknn-utils",
+                "/root/work/yolov5-deploy/main-utils",
+                "/usr/include/opencv4"
+            ],
+            "defines": [], // 不用变
+            "compilerPath": "/usr/bin/gcc", // 不用变
+            "cStandard": "gnu11", // 不用变
+            "cppStandard": "gnu++11", // 不用变
+            "intelliSenseMode": "linux-gcc-arm64", // 不用变
+            "configurationProvider": "ms-vscode.cmake-tools" // 不用变
+        }
+    ],
+    "version": 4 // 不用变
+}

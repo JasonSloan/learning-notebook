@@ -19,7 +19,11 @@ cat /sys/kernel/debug/rknpu/load
 cat /sys/class/devfreq/fb000000.gpu/load
 ```
 
-# 四. 模型编译
+# 四. CPU, GPU, NPU定频
+
+[链接](https://zhuanlan.zhihu.com/p/678024036?utm_campaign=shareopn&utm_medium=social&utm_psn=1753489687187283969&utm_source=wechat_session)
+
+# 五. 模型编译
 
 **编译环境搭建: **
 
@@ -38,3 +42,7 @@ cat /sys/class/devfreq/fb000000.gpu/load
 
 ![](assets/export.jpg)
 
+# 六. 其他注意事项
+
+前处理的letterbox和cvtCOLOR是使用瑞芯微自己开发的RGA做的, 不是opencv做的, RGA比opencv的好处在于RGA可以大大节省cpu的使用率, 但是RGA在高频使用时会出错(并发越多, 越容易出错), 所以在使用RGA之前最好先sleep 1-5ms, RGA于OpenCV使用对比[链接](https://zhuanlan.zhihu.com/p/665203639?utm_campaign=shareopn&utm_medium=social&utm_psn=1753495067145564160&utm_source=wechat_session)
+在使用多batch推理时, 需要将batch-size设置为3的倍数(RKNN只支持固定batch-size的多batch推理, 不支持动态batch推理)
