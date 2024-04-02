@@ -27,6 +27,7 @@
 #include "opencv2/opencv.hpp"
 #include "inference.hpp"
 
+#define MPP_ALIGN(x, a) (((x) + (a) - 1) &~ ((a) - 1))
 
 using namespace std;
 using namespace cv;
@@ -382,27 +383,22 @@ public:
             tgt_img.virt_addr = im0.data;
             tgt_img.size = src_size;
         } else {
-            int aligned_width = src_w / 16 * 16;
-            int aligned_height = src_h / 16 * 16;
-            unsigned char* data_host = im0.data;
-            size_t tgt_size = aligned_width * aligned_height * 3;
-            shared_ptr<unsigned char> data_tgt(new unsigned char[tgt_size], default_delete<unsigned char[]>());
-            
-            for (int i = 0; i < aligned_height; ++i){   
-                for (int j = 0; j < aligned_width; ++j ){
-                    for (int c = 0; c < 3; ++c){
-                        size_t offset_host = c + j * 3 + i * src_w * 3;
-                        size_t offset_tgt = c + j * 3 + i * aligned_width * 3;
-                        *(data_tgt.get() + offset_tgt) = *(data_host + offset_host);
-                    }
-                }
+            // align image: only width dim need to be aligned to multiple of 16
+            int aligned_width = MPP_ALIGN(src_w, 16);
+            int hor_stride = aligned_width * 3;
+            int aligned_height = src_h;
+            size_t aligned_data_size = aligned_height * hor_stride;
+            shared_ptr<unsigned char> data_tgt(new unsigned char[aligned_data_size], default_delete<unsigned char[]>()); 
+            memset(data_tgt.get(), 0, sizeof(data_tgt.get()));   
+            for (int i = 0; i < src_h; i++) {
+                memcpy((unsigned char*)data_tgt.get() + i * hor_stride, im0.data + i * src_w * 3, src_w * 3);
             }
 
             tgt_img.width = aligned_width;
             tgt_img.height = aligned_height;
             tgt_img.format = format;
             tgt_img.virt_addr = data_tgt.get();
-            tgt_img.size = tgt_size;
+            tgt_img.size = aligned_data_size;
         }
         return ret;
     }
