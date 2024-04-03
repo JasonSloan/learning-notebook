@@ -27,8 +27,6 @@
 #include "opencv2/opencv.hpp"
 #include "inference.hpp"
 
-#define MPP_ALIGN(x, a) (((x) + (a) - 1) &~ ((a) - 1))
-
 
 using namespace std;
 using namespace cv;
@@ -40,7 +38,7 @@ float micros_cast(const std::chrono::duration<Rep, Period>& d) {
     return static_cast<float>(std::chrono::duration_cast<std::chrono::microseconds>(d).count()) / 1000.;
 }
 
-
+#define MPP_ALIGN(x, a) (((x) + (a) - 1) &~ ((a) - 1))
 
 const int anchors[3][6] = {{10, 13, 16, 30, 33, 23},
                            {30, 61, 62, 45, 59, 119},
@@ -150,7 +148,7 @@ public:
         return pro.get_future().get();	
     }
 
-    int init_model(string model_path) {
+    int init_model() {
         // init some variables
         int ret;
         char* model;
@@ -259,7 +257,7 @@ public:
     }
 
     void worker(promise<bool>& pro){
-        int ret = init_model(modelPath);
+        int ret = init_model();
         if (ret != 0) {
             pro.set_value(false);
         } else {
@@ -370,7 +368,7 @@ public:
         return 0;
     }
 
-    int align_image(Mat& im0, image_buffer_t& tgt_img){
+    void align_image(Mat& im0, image_buffer_t& tgt_img){
         int ret = 0;
         int src_w = im0.cols;
         int src_h = im0.rows;
@@ -382,7 +380,6 @@ public:
             tgt_img.width = src_w;
             tgt_img.height = src_h;
             tgt_img.format = format;
-            // shared_ptr<unsigned char> s_virt_addr(new unsigned char[src_size], default_delete<unsigned char[]>());
             tgt_img.virt_addr = im0.data;
             tgt_img.size = src_size;
         } else {
@@ -403,7 +400,6 @@ public:
             tgt_img.virt_addr = data_tgt.get();
             tgt_img.size = aligned_data_size;
         }
-        return ret;
     }
 
     int preprocess_rga(vector<Mat>& im0s, 
@@ -424,23 +420,21 @@ public:
         image_buffer_t dst_img;
         // iter every image, do letterbox and convert color and then copy the image data to the imgs_done variable
         for (int i = 0; i < batch_size_; ++i){
-            // align image to multiple of 16(it is the needed for letterbox_rga)
+            // align image: only width dim need to be aligned to multiple of 16(it is the needed for letterbox_rga)
             align_image(im0s[i], src_img);
             // letterbox
             // ! sleep for about 1-5 ms, otherwise, the rga will go wrong, it is weird, but this is the only solution
             // this_thread::sleep_for(std::chrono::milliseconds(2));
             letterbox_t letter_box;
             ret = letterbox_rga(src_img, dst_img, letter_box, app_ctx);
-            if (ret != 0) return -1;
+            if (ret != 0) return ret;
             letter_boxes.push_back(letter_box);
         
             // convert color from BGR to RGB and copy the converted data to imgs_done
             // ! sleep for about 1-5 ms, otherwise, the rga will go wrong, it is weird, but this is the only solution
             // this_thread::sleep_for(std::chrono::milliseconds(2));
             ret = cvtColor_rga(i_head, i_size, dst_img, imgs_done, RK_FORMAT_BGR_888, RK_FORMAT_RGB_888, log);
-            if (ret != 0){
-                return -1;
-            }
+            if (ret != 0) return ret;
 
             memcpy(imgs_done.get() + i_head, dst_img.virt_addr, i_size);
             i_head += i_size;
@@ -454,23 +448,80 @@ public:
         inputs[0].size = total_size;
         inputs[0].buf = imgs_done.get();
         ret = rknn_inputs_set(app_ctx->rknn_ctx, app_ctx->io_num.n_input, inputs);
-        if (ret < 0) {
-            printf("rknn_inputs_set fail! ret=%d\n", ret);
-            return -1;
+        if (ret < 0) return ret;
+        return 0;
+    }
+
+    int letterbox_opencv(Mat& img, letterbox_t& letter_box, size_t& i_size, rknn_app_context_t* app_ctx){
+        memset(&letter_box, 0, sizeof(letterbox_t));
+        int img_height = img.rows;
+        int img_width = img.cols;
+        int img_channels = img.channels();
+
+        int input_width = app_ctx->model_width;
+        int input_height = app_ctx->model_height;
+
+        float scale_factor = min(static_cast<float>(input_width) / static_cast<float>(img.cols),
+                        static_cast<float>(input_height) / static_cast<float>(img.rows));
+        int img_new_w_unpad = img.cols * scale_factor;
+        int img_new_h_unpad = img.rows * scale_factor;
+        if ((img_new_w_unpad % 2) != 0) img_new_w_unpad -= 1;
+        if ((img_new_h_unpad % 2) != 0) img_new_h_unpad -= 1;
+        int pad_w = round((input_width - img_new_w_unpad - 0.01) / 2);		                   
+        int pad_h = round((input_height - img_new_h_unpad - 0.01) / 2);
+        cv::resize(img, img, cv::Size(img_new_w_unpad, img_new_h_unpad));
+        cv::copyMakeBorder(img, img, pad_h, pad_h, pad_w, pad_w, cv::BORDER_CONSTANT, cv::Scalar(114, 114, 114));
+        letter_box.x_pad = pad_w;
+        letter_box.y_pad = pad_h;
+        letter_box.scale = scale_factor;
+    }
+
+    int preprocess_opencv(vector<Mat>& im0s, 
+                    rknn_input* inputs,  
+                    vector<letterbox_t>& letter_boxes, 
+                    rknn_app_context_t* app_ctx,
+                    bool log=false){
+        int ret;
+        int model_width = app_ctx->model_width;
+        int model_height = app_ctx->model_height;
+        int model_ch = app_ctx->model_channel;
+        size_t total_size = model_width * model_height * model_ch * batch_size_;
+        shared_ptr<unsigned char> imgs_done(new unsigned char[total_size], default_delete<unsigned char[]>());
+        
+        int i_head = 0;
+        size_t i_size = model_width * model_height * model_ch;
+        // iter every image, do letterbox and convert color and then copy the image data to the imgs_done variable
+        for (int i = 0; i < batch_size_; ++i){
+            
+            // letterbox
+            letterbox_t letter_box;
+            letterbox_opencv(im0s[i], letter_box, i_size, app_ctx);
+            letter_boxes.push_back(letter_box);
+            // cvtColor
+            cv::cvtColor(im0s[i], im0s[i], cv::COLOR_BGR2RGB);
+            memcpy(imgs_done.get() + i_head, im0s[i].data, i_size);
+            i_head += i_size;
         }
+
+        // set inputs
+        memset(inputs, 0, sizeof(inputs));
+        inputs[0].index = 0;
+        inputs[0].type = RKNN_TENSOR_UINT8;       // cv::Mat data is uint8 type
+        inputs[0].fmt = RKNN_TENSOR_NHWC;
+        inputs[0].size = total_size;
+        inputs[0].buf = imgs_done.get();
+        ret = rknn_inputs_set(app_ctx->rknn_ctx, app_ctx->io_num.n_input, inputs);
+        if (ret < 0) return ret;
         return 0;
     }
 
     int do_infer(rknn_app_context_t *app_ctx){
         int ret = rknn_run(app_ctx->rknn_ctx, nullptr);
-        if (ret < 0) {
-            printf("rknn_run fail! ret=%d\n", ret);
-            return -1;
-        }
+        if (ret < 0) return ret;
         return 0;
     }
     
-    void postprocess_fp(int& img_idx,
+    void postprocess_fp_1output(int& img_idx,
                     rknn_app_context_t *app_ctx, 
                     rknn_output* outputs,
                     letterbox_t* letter_box, 
@@ -516,7 +567,7 @@ public:
             float image_base_left = (left - letter_box->x_pad) / letter_box->scale;                                                                     // x1
             float image_base_right = (right - letter_box->x_pad) / letter_box->scale;                                                                   // x2
             float image_base_top = (top - letter_box->y_pad) / letter_box->scale;                                                                       // y1
-            float image_base_bottom = (bottom - letter_box->y_pad) / letter_box->scale;                                                                 // y2
+            float image_base_bottom = (bottom - letter_box->y_pad) / letter_box->scale;
             bboxes.push_back({image_base_left, image_base_top, image_base_right, image_base_bottom, (float)label, confidence}); // 放进bboxes中
         }
         if (log) printf("decoded bboxes.size = %d\n", bboxes.size());
@@ -566,7 +617,7 @@ public:
         if (log) printf("box_result.size = %d\n", result.boxes.size());
     }
 
-    void postprocess_i8(int& img_idx,
+    void postprocess_i8_3output(int& img_idx,
                     rknn_app_context_t *app_ctx, 
                     rknn_output* outputs,
                     letterbox_t* letter_box, 
@@ -706,8 +757,7 @@ public:
             jobs_.emplace(std::move(job));                              // 向任务队列jobs_中添加任务job
         }
         cv_.notify_one();                                               // 通知worker线程开始工作了
-        return fut;
-        // return fut.get();                                            // 等待模型将推理数据返回fut，然后fut再将数据return出去
+        return fut;                                                     // 等待模型将推理数据返回fut，然后fut再将数据return出去
     }
 
     void print_time_cost(){
@@ -717,9 +767,16 @@ public:
     }
     
     void inference(Job& job){
+        // define a lamda function that deal with exception circumstance
+        auto set_pro_exception = [](Job& job, vector<Result>& results){
+            job.pro->set_value(results);
+            return;
+        };
         // fetch data
         int ret;
         vector<Mat> imgs = job.input_images;
+        vector<Result> results;
+        results.resize(imgs.size());
         bool inferLog = job.inferLog;
 
         // init some variables
@@ -738,14 +795,15 @@ public:
         // https://zhuanlan.zhihu.com/p/665203639?utm_campaign=shareopn&utm_medium=social&utm_psn=1753495067145564160&utm_source=wechat_session
         start = time_point::now();
         ret = preprocess_rga(imgs, inputs, letter_boxes, &rknn_app_ctx, inferLog); 
-        if (ret != 0) return;   
+        // ret = preprocess_opencv(imgs, inputs, letter_boxes, &rknn_app_ctx);
+        if (ret != 0) return set_pro_exception(job, results);   
         stop = time_point::now();
         InferImpl::records[0].push_back(micros_cast(stop - start));
 
         // infer
         start = time_point::now();
         ret = do_infer(&rknn_app_ctx);
-        if (ret != 0) return;
+        if (ret != 0) return set_pro_exception(job, results); 
         stop = time_point::now();
         InferImpl::records[1].push_back(micros_cast(stop - start));
 
@@ -758,18 +816,15 @@ public:
             outputs[i].want_float = (!rknn_app_ctx.is_quant);
         }
         ret = rknn_outputs_get(rknn_app_ctx.rknn_ctx, n_output, outputs, NULL);
-        if (ret < 0) {
-            printf("rknn_outputs_get fail! ret=%d\n", ret);
-        }
-        vector<Result> results;
+        if (ret < 0) set_pro_exception(job, results); 
         for (int i = 0; i < batch_size_; ++i){
             Result result;
             if (rknn_app_ctx.is_quant) {
-                postprocess_i8(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result, inferLog);
+                postprocess_i8_3output(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result, inferLog);
             } else {
-                postprocess_fp(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result, output_numbox, output_numprob, inferLog);
+                postprocess_fp_1output(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result, output_numbox, output_numprob, inferLog);
             }
-            results.push_back(result);
+            results[i] = result;
         }
         stop = time_point::now();
         InferImpl::records[2].push_back(micros_cast(stop - start));

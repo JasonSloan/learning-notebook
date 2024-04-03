@@ -12,11 +12,12 @@
  apt install openssh-server
 ```
 
-# 三. 查看NPU和GPU使用率
+# 三. 查看NPU和GPU和RGA使用率
 
 ```bash
 cat /sys/kernel/debug/rknpu/load
 cat /sys/class/devfreq/fb000000.gpu/load
+cat /sys/kernel/debug/rkrga/load
 ```
 
 # 四. CPU, GPU, NPU定频
@@ -52,6 +53,8 @@ cat /sys/class/devfreq/fb000000.gpu/load
 
 # 七. 其他注意事项
 
-前处理的letterbox和cvtCOLOR是使用瑞芯微自己开发的RGA做的, 不是opencv做的, RGA比opencv的好处在于RGA可以大大节省cpu的使用率, 但是RGA在高频使用时会出错(并发越多, 越容易出错), 所以在使用RGA之前最好先sleep 1-5ms
+前处理的letterbox和cvtCOLOR是使用瑞芯微自己开发的RGA做的, 不是opencv做的, RGA比opencv的好处在于RGA可以大大节省cpu的使用率, 但是RGA在高频使用时会出错(并发越多, 越容易出错, 在image_utils.c中的imfill的API出错), 但是实际上出错也不会影响推理, 结果也是对的, 如果报错信息多, 可以注释掉imfill, 直接令ret_rga = -1。但是如果影响到了结果, 那么解决办法就是sleep 1-5ms
+
 使用rga处理图像时,要保证原图的宽必须是16的倍数,否则会出错, 高可以不是16的倍数
+
 在使用多batch推理时, 需要将batch-size设置为3的倍数(RKNN只支持固定batch-size的多batch推理, 不支持动态batch推理)

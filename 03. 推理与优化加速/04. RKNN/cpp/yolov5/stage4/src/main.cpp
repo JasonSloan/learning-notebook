@@ -81,7 +81,7 @@ void collect_data(string& path, int& batch_size, int& imagecount, vector<vector<
 
 int main() {
 	// RKNN只支持固定batch-size的多batch, 不支持动态batch, batch-size一定要和模型输入保持一致
-	int niter = 1000;
+	int niter = 1;
 	int batch_size = 1;
 	string model_path = "weights/last-relu-3output-i8-bs1.rknn";
 	string path = "inputs/images";

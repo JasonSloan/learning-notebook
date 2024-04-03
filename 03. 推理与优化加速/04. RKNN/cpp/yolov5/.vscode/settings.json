@@ -65,6 +65,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "stdbool.h": "c",
-        "future": "cpp"
+        "future": "cpp",
+        "queue": "cpp",
+        "dma_alloc.h": "c"
     }
 }

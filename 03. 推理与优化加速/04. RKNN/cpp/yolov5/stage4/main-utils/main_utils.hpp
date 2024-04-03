@@ -71,8 +71,8 @@ void draw_rectangles(vector<Result>& results, vector<Mat>& im0s, vector<string>&
 				5, 8, 0
 				);
 			// cv::putText(im0, LABELS[result.labels[i]], cv::Point(result.boxes[i][0], result.boxes[i][1]), cv::FONT_HERSHEY_SIMPLEX, 1.4, COLORS[result.labels[i]], 2);
+			cv::imwrite(save_paths[i], im0);
 		}
-        cv::imwrite(save_paths[i], im0);
 	}
 }
 

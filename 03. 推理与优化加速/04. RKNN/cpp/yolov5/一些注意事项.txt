@@ -1,7 +1,15 @@
 查看NPU负载:
 cat /sys/kernel/debug/rknpu/load
+
+查看rga使用率:cat /sys/kernel/debug/rkrga/load
+
 CPU,GPU,NPU定频:
 https://zhuanlan.zhihu.com/p/678024036?utm_campaign=shareopn&utm_medium=social&utm_psn=1753489687187283969&utm_source=wechat_session
-前处理的letterbox和cvtCOLOR是使用瑞芯微自己开发的RGA做的, 不是opencv做的, RGA比opencv的好处在于RGA可以大大节省cpu的使用率, 但是RGA在高频使用时会出错(并发越多, 越容易出错), 所以在使用RGA之前最好先sleep 1-5ms
-使用rga处理图像时,要保证原图的宽和高都必须是16的倍数,否则会出错; 对齐成16的倍数非常耗时, 建议使用16倍数的输入
+
+
+前处理的letterbox和cvtCOLOR是使用瑞芯微自己开发的RGA做的, 不是opencv做的, 
+RGA比opencv的好处在于RGA可以大大节省cpu的使用率, 但是RGA在高频使用时会出错(并发越多, 越容易出错, 在image_utils.c中的imfill的API出错), 
+但是实际上出错也不会影响推理, 结果也是对的, 如果报错信息多, 可以注释掉imfill, 直接令ret_rga = -1
+
+使用rga处理图像时,要保证原图的宽必须是16的倍数,否则会出错, 高可以不是16的倍数
 在使用多batch推理时, 需要将batch-size设置为3的倍数(RKNN只支持固定batch-size的多batch推理, 不支持动态batch推理)
