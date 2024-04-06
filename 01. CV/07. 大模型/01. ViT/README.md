@@ -1,6 +1,6 @@
 ![](assets/vit.jpg)
 
-ViT本质是一个基于Transformer的图像分类模型，思想是将一张图分成nxn个patch，然后对每一个patch进行一个由图像到一维向量的转换，然后将这nxn个patch的图像的1维向量输入Transformer的Encoder结构中，然后再接一个MLP映射到num_classes维度，进行类别预测。
+ViT本质是一个基于Transformer的图像分类模型，思想是将一张图分成nxn个patch，然后对每一个patch进行一个由图像到一维向量的转换，然后再为这nxn个patch的图像的1维向量添加一个维度相同的cls_token，然后将这nxn个patch的图像的1维向量连同添加的cls_token一起输入Transformer的Encoder结构中，然后再接一个MLP映射到num_classes维度，进行类别预测。
 
 config.py
 
