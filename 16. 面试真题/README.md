@@ -107,3 +107,5 @@
 # 手推算法
 
 ![](assets/SVM.jpg)
+
+![](assets/linear.jpg)
