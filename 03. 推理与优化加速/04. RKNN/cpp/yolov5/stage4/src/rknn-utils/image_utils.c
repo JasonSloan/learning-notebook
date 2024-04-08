@@ -7,7 +7,6 @@
 
 #include "im2d.h"
 #include "drmrga.h"
-#include "dma_alloc.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_THREAD_LOCALS
@@ -259,7 +258,7 @@ int read_image(const char* path, image_buffer_t* image)
     }
 }
 
-int write_image(const char* path, const image_buffer_t* img)
+int write_image(const char* path, image_buffer_t* img)
 {
     int ret;
     int width = img->width;
@@ -632,15 +631,18 @@ static int convert_image_rga(image_buffer_t* src_img, image_buffer_t* dst_img, i
 
     if (drect.width != dstWidth || drect.height != dstHeight) {
         im_rect dst_whole_rect = {0, 0, dstWidth, dstHeight};
-        int imcolor;
-        char* p_imcolor = &imcolor;
-        p_imcolor[0] = color;
-        p_imcolor[1] = color;
-        p_imcolor[2] = color;
-        p_imcolor[3] = color;
+        // int imcolor;
+        // char* p_imcolor = &imcolor;
+        // p_imcolor[0] = color;
+        // p_imcolor[1] = color;
+        // p_imcolor[2] = color;
+        // p_imcolor[3] = color;
         // printf("fill dst image (x y w h)=(%d %d %d %d) with color=0x%x\n",
         //     dst_whole_rect.x, dst_whole_rect.y, dst_whole_rect.width, dst_whole_rect.height, imcolor);
-        ret_rga = imfill(rga_buf_dst, dst_whole_rect, imcolor);
+
+        // if the imfill api goes wrong, it doesnt influence the outcome, just ignore it 
+        // ret_rga = imfill(rga_buf_dst, dst_whole_rect, imcolor);
+        ret_rga = -1;
         if (ret_rga <= 0) {
             if (dst != NULL) {
                 size_t dst_size = get_image_size(dst_img);

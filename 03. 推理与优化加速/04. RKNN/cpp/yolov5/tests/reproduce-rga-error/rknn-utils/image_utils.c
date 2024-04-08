@@ -7,6 +7,7 @@
 
 #include "im2d.h"
 #include "drmrga.h"
+#include "dma_alloc.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_THREAD_LOCALS
@@ -258,7 +259,7 @@ int read_image(const char* path, image_buffer_t* image)
     }
 }
 
-int write_image(const char* path, image_buffer_t* img)
+int write_image(const char* path, const image_buffer_t* img)
 {
     int ret;
     int width = img->width;
@@ -488,7 +489,6 @@ int get_image_size(image_buffer_t* image)
     }
 }
 
-
 static int convert_image_rga(image_buffer_t* src_img, image_buffer_t* dst_img, image_rect_t* src_box, image_rect_t* dst_box, char color)
 {
     int ret = 0;
@@ -573,13 +573,11 @@ static int convert_image_rga(image_buffer_t* src_img, image_buffer_t* dst_img, i
     dst_param.width = dstWidth;
     dst_param.height = dstHeight;
     dst_param.format = dstFmt;
-
-    // unsigned char* src_buf;
-    // unsigned char* dst_buf;
-    // int src_buf_size = srcWidth * srcHeight * 3;
-    // int dst_buf_size = dstWidth * dstHeight * 3;
-    // ret = dma_buf_alloc(DMA_HEAP_DMA32_UNCACHED_PATH, src_buf_size, &src_fd, (void **)&src_buf);
-    // ret = dma_buf_alloc(DMA_HEAP_DMA32_UNCACHED_PATH, dst_buf_size, &dst_fd, (void **)&dst_buf);
+    
+    int src_buf_size = srcWidth * srcHeight * 3;
+    int dst_buf_size = dstWidth * dstHeight * 3;
+    ret = dma_buf_alloc(DMA_HEAP_DMA32_UNCACHED_PATH, src_buf_size, &dst_fd, (void **)&src);
+    ret = dma_buf_alloc(DMA_HEAP_DMA32_UNCACHED_PATH, dst_buf_size, &dst_fd, (void **)&src);
 
     if (use_handle) {
         if (src_phy != NULL) {
@@ -631,18 +629,15 @@ static int convert_image_rga(image_buffer_t* src_img, image_buffer_t* dst_img, i
 
     if (drect.width != dstWidth || drect.height != dstHeight) {
         im_rect dst_whole_rect = {0, 0, dstWidth, dstHeight};
-        // int imcolor;
-        // char* p_imcolor = &imcolor;
-        // p_imcolor[0] = color;
-        // p_imcolor[1] = color;
-        // p_imcolor[2] = color;
-        // p_imcolor[3] = color;
+        int imcolor;
+        char* p_imcolor = &imcolor;
+        p_imcolor[0] = color;
+        p_imcolor[1] = color;
+        p_imcolor[2] = color;
+        p_imcolor[3] = color;
         // printf("fill dst image (x y w h)=(%d %d %d %d) with color=0x%x\n",
         //     dst_whole_rect.x, dst_whole_rect.y, dst_whole_rect.width, dst_whole_rect.height, imcolor);
-
-        // if the imfill api goes wrong, it doesnt influence the outcome, just ignore it 
-        // ret_rga = imfill(rga_buf_dst, dst_whole_rect, imcolor);
-        ret_rga = -1;
+        ret_rga = imfill(rga_buf_dst, dst_whole_rect, imcolor);
         if (ret_rga <= 0) {
             if (dst != NULL) {
                 size_t dst_size = get_image_size(dst_img);

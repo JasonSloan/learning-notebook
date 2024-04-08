@@ -90,10 +90,6 @@ int dma_sync_cpu_to_device(int fd) {
     return ioctl(fd, DMA_BUF_IOCTL_SYNC, &sync);
 }
 
-// ! 注意加上这一段才能让.c的文件调用到.cpp的函数, 否则编译时会出现未定义
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 int dma_buf_alloc(const char *path, size_t size, int *fd, void **va) {
     int ret;
     int prot;
@@ -139,9 +135,6 @@ int dma_buf_alloc(const char *path, size_t size, int *fd, void **va) {
 
     return 0;
 }
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 void dma_buf_free(size_t size, int *fd, void *va) {
     int len;

@@ -67,6 +67,14 @@
         "stdbool.h": "c",
         "future": "cpp",
         "queue": "cpp",
-        "dma_alloc.h": "c"
+        "dma_alloc.h": "c",
+        "regex": "cpp",
+        "filesystem": "cpp",
+        "strstream": "cpp",
+        "bitset": "cpp",
+        "charconv": "cpp",
+        "codecvt": "cpp",
+        "shared_mutex": "cpp",
+        "cfenv": "cpp"
     }
 }

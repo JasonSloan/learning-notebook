@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "opencv2/opencv.hpp"
-#include "inference.hpp"
+#include "tqdm.hpp"
+#include "opencv2/opencv.hpp" 
+#include "inference.hpp"      // for "Result" struct
 
 using namespace std;
 using namespace cv;
@@ -58,6 +59,7 @@ string getFileName(const std::string& file_path, bool with_ext=true){
     std::string img_name = tmp.substr(0, tmp.find_last_of('.'));
     return img_name;
 }
+
 void draw_rectangles(vector<Result>& results, vector<Mat>& im0s, vector<string>& save_paths){
 	for (int i = 0; i < results.size(); ++i) {
 		Result result = results[i];
@@ -74,6 +76,73 @@ void draw_rectangles(vector<Result>& results, vector<Mat>& im0s, vector<string>&
 		}
         cv::imwrite(save_paths[i], im0);
 	}
+}
+
+void collect_data(string& path, int& batch_size, int& imagecount, vector<vector<Mat>>& imgs, vector<vector<string>>& save_paths){
+	bool is_video = ends_with(path, ".mp4");
+
+	// prepare and infer
+	int total = 0;
+	int broken = 0;
+	int batch_idx = 0;
+	spdlog::info("----> Start to read and collect images/video from path '{}' ...", path);
+	if (!is_video){
+		vector<string> files;
+		bool success = listdir(path, files);
+		// push back imgs into a vector
+		int num_batch = ceil(float(files.size()) / float(batch_size));
+		imgs.resize(num_batch);
+		save_paths.resize(num_batch);
+		for (int i : tq::trange(num_batch * batch_size)){
+			cv::Mat img = cv::imread(files[i], IMREAD_COLOR);
+			if (img.empty()) {
+				printf("Unable to read image %s\n", files[i].c_str());
+				broken++;
+				continue;
+			}
+			if ((i != 0) && (i % batch_size == 0))		// if read successfully then compute the batch_idx
+				batch_idx++;
+			imgs[batch_idx].push_back(img);
+			std::string filename = getFileName(files[i]);
+			string save_path = "outputs/" + filename;
+			save_paths[batch_idx].push_back(save_path);
+			total++;
+		}
+	} else {
+		cv::VideoCapture cap(path);
+		if (!cap.isOpened()) {
+			printf("Unable to open video %s", path.c_str());
+			return;
+		}
+		cv::Mat frame;
+		int frame_count = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_COUNT));
+		int num_batch = ceil(float(frame_count) / float(batch_size));
+		imgs.resize(num_batch);
+		save_paths.resize(num_batch);
+		for (int i : tq::trange(num_batch * batch_size)) {
+			cap >> frame;
+			if (frame.empty()) {
+				printf("Unable to read frame %d of video %s\n", total, path.c_str());
+				broken++;
+				continue;
+			}
+			if ((i != 0) && (i % batch_size == 0))		
+				batch_idx++;
+			imgs[batch_idx].push_back(frame);
+			string save_path = "outputs/frame_" + std::to_string(total) + ".jpg";
+			save_paths[batch_idx].push_back(save_path);
+			total++;
+		}
+		cap.release();
+	}
+	imagecount = total - broken;
+	if (imagecount % batch_size != 0) {
+		imagecount = imagecount - imagecount % batch_size;
+		imgs.pop_back();			// pop the last batch
+		save_paths.pop_back();
+	}
+	printf("\n");
+	spdlog::info("Read video/images of path '{}' successfully, total: {}, broken: {}, reserved: {}", path.c_str(), total, broken, imagecount);
 }
 
 float mean(vector<float> x){

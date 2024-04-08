@@ -1,42 +1,41 @@
 #include <iostream>
 #include <stdio.h> 
 
+#include <string>
+#include <vector>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <string>
-#include <vector>
 #include <math.h>
 #include <cmath>
-#include <algorithm>                                                        // max_element要用到
-#include <functional>                                                       // std::ref()需要用这个库
+#include <algorithm>                                    // max_element要用到
+#include <functional>                                   // std::ref()需要用这个库
 #include <unistd.h>
-#include <thread>                                                           // 线程
-#include <queue>                                                            // 队列
-#include <mutex>                                                            // 线程锁
-#include <chrono>                                                           // 时间库
-#include <memory>                                                           // 智能指针
-#include <future>                                                           // future和promise都在这个库里，实现线程间数据传输
-#include <condition_variable>                                               // 线程通信库
+#include <thread>                                       // 线程
+#include <queue>                                        // 队列
+#include <mutex>                                        // 线程锁
+#include <chrono>                                       // 时间库
+#include <memory>                                       // 智能指针
+#include <future>                                       // future和promise都在这个库里，实现线程间数据传输
+#include <condition_variable>                           // 线程通信库
+#include <filesystem>                                   // 文件操作有关
 
-#include "common.h"
-#include "rknn_api.h"
-#include "image_utils.h"
-#include "RgaUtils.h"
-#include "im2d.hpp"
-#include "opencv2/opencv.hpp"
-#include "inference.hpp"
+#include "rknn_api.h"                                   // rk运行时库的头文件
+#include "image_utils.h"                                // rga库相关的头文件
+#include "RgaUtils.h"                                   // rga库相关的头文件
+#include "im2d.hpp"                                     // rga库相关的头文件
+#include "common.h"                                     // 一些官方自定义结构体
 
+#include "model_utils.hpp"                              // 模型读取, Int8转fp等一些函数
+#include "opencv2/opencv.hpp"                           // spdlog日志相关
+#include "spdlog/logger.h"                              // spdlog日志相关
+#include "spdlog/spdlog.h"                              // spdlog日志相关
+#include "spdlog/sinks/basic_file_sink.h"               // spdlog日志相关
+#include "inference.hpp"                                // 本代码的头文件, 对外提供的接口
 
 using namespace std;
 using namespace cv;
-
-using time_point = chrono::high_resolution_clock;
-
-template <typename Rep, typename Period>
-float micros_cast(const std::chrono::duration<Rep, Period>& d) {
-    return static_cast<float>(std::chrono::duration_cast<std::chrono::microseconds>(d).count()) / 1000.;
-}
+namespace fs = std::filesystem;
 
 #define MPP_ALIGN(x, a) (((x) + (a) - 1) &~ ((a) - 1))
 
@@ -50,82 +49,12 @@ struct Job{
     bool inferLog;                                  // 是否打印日志
 };
 
-typedef struct {
-    rknn_context rknn_ctx;
-    rknn_input_output_num io_num;
-    rknn_tensor_attr* input_attrs;
-    rknn_tensor_attr* output_attrs;
-    int model_channel;
-    int model_width;
-    int model_height;
-    bool is_quant;
-} rknn_app_context_t;
-
-int read_data_from_file(const char *path, char **out_data){
-    FILE *fp = fopen(path, "rb");
-    if(fp == NULL) {
-        printf("fopen %s fail!\n", path);
-        return -1;
-    }
-    fseek(fp, 0, SEEK_END);
-    int file_size = ftell(fp);
-    char *data = (char *)malloc(file_size+1);
-    data[file_size] = 0;
-    fseek(fp, 0, SEEK_SET);
-    if(file_size != fread(data, 1, file_size, fp)) {
-        printf("fread %s fail!\n", path);
-        free(data);
-        fclose(fp);
-        return -1;
-    }
-    if(fp) {
-        fclose(fp);
-    }
-    *out_data = data;
-    return file_size;
-}
-
-static void dump_tensor_attr(rknn_tensor_attr *attr){
-    printf("index=%d, name=%s, n_dims=%d, dims=[%d, %d, %d, %d], n_elems=%d, size=%d, fmt=%s, type=%s, qnt_type=%s, "
-           "zp=%d, scale=%f\n",
-           attr->index, attr->name, attr->n_dims, attr->dims[0], attr->dims[1], attr->dims[2], attr->dims[3],
-           attr->n_elems, attr->size, get_format_string(attr->fmt), get_type_string(attr->type),
-           get_qnt_type_string(attr->qnt_type), attr->zp, attr->scale);
-}
-
-inline static int32_t __clip(float val, float min, float max){
-    float f = val <= min ? min : (val >= max ? max : val);
-    return f;
-}
-
-static int8_t qnt_f32_to_affine(float f32, int32_t zp, float scale){
-    float dst_val = (f32 / scale) + zp;
-    int8_t res = (int8_t)__clip(dst_val, -128, 127);
-    return res;
-}
-
-static float deqnt_affine_to_f32(int8_t qnt, int32_t zp, float scale) { return ((float)qnt - (float)zp) * scale; }
-
-void release_model(rknn_app_context_t *app_ctx){
-    if (app_ctx->rknn_ctx != 0){
-        rknn_destroy(app_ctx->rknn_ctx);
-        app_ctx->rknn_ctx = 0;
-    }
-    if (app_ctx->input_attrs != NULL){
-        free(app_ctx->input_attrs);
-        app_ctx->input_attrs = NULL;
-    }
-    if (app_ctx->output_attrs != NULL){
-        free(app_ctx->output_attrs);
-        app_ctx->output_attrs = NULL;
-    }
-}
-
 class InferImpl : public InferInterface{            // 继承虚基类，从而实现load_model和destroy的隐藏
 public:
     virtual ~InferImpl(){
         stop();
-        printf("Destruct instance done!\n");
+        logger_->warn("Destruct instance done!");
+        spdlog::warn("Destruct instance done!");
     }
 
     void stop(){
@@ -138,10 +67,10 @@ public:
             worker_thread_.join();
     }
 
-    bool startup(string file, int batch_size, bool log=true){
+    bool startup(string file, int batch_size, bool modelLog=true){
         modelPath = file;
         batch_size_ = batch_size;
-        modelLog = log;
+        modelLog_ = modelLog;
         running_ = true;                                                        // 启动后，运行状态设置为true
         promise<bool> pro;
         worker_thread_ = thread(&InferImpl::worker, this, std::ref(pro));       // 为什么要加std::ref, 因为创建新的线程的时候希望新的线程操作原始的pro,而不是复制一份新的pro
@@ -159,8 +88,9 @@ public:
 
         // Load RKNN Model
         model_len = read_data_from_file(modelPath.c_str(), &model);
-        if (model == NULL){
-            printf("load_model fail!\n");
+        if (model_len == -1){
+            logger_->error("Load model failed from path: {}!", modelPath);
+            spdlog::error("Load model failed from path: {}!", modelPath);
             return -1;
         }
 
@@ -168,7 +98,8 @@ public:
         ret = rknn_init(&ctx, model, model_len, 0, NULL);
         free(model);                            // 上一步已经将数据赋值给ctx, 所以这一步就将model中的数据释放  
         if (ret < 0){
-            printf("rknn_init fail! ret=%d\n", ret);
+            logger_->error("RKNN init failed! ret={}", ret);
+            spdlog::error("RKNN init failed! ret={}", ret);
             return -1;
         }
 
@@ -176,10 +107,11 @@ public:
         rknn_input_output_num io_num;
         ret = rknn_query(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
         if (ret != 0){
-            printf("rknn_query fail! ret=%d\n", ret);
+            logger_->error("RKNN query failed! ret={}", ret);
+            spdlog::error("RKNN query failed! ret={}", ret);
             return -1;
         }
-        if (modelLog) printf("model input num: %d, output num: %d\n", io_num.n_input, io_num.n_output);
+        if (modelLog_) spdlog::info("model input num: {}, output num: {}", io_num.n_input, io_num.n_output);
 
         // Get Model Input Info
         rknn_tensor_attr input_attrs[io_num.n_input];
@@ -187,28 +119,30 @@ public:
         input_attrs[0].index = 0;                           // there is only one input, so here I just specify the input index to 0
         ret = rknn_query(ctx, RKNN_QUERY_INPUT_ATTR, &(input_attrs[0]), sizeof(rknn_tensor_attr));
         if (ret != 0) {
-            printf("rknn_query fail! ret=%d\n", ret);
+            logger_->error("RKNN query failed! ret={}", ret);
+            spdlog::error("RKNN query failed! ret={}", ret);
             return -1;
         }
-        if (modelLog){
-            printf("input tensors:\n");
+        if (modelLog_){
+            spdlog::info("Input tensors:");
             dump_tensor_attr(&(input_attrs[0]));
         }
         
 
         // Get Model Output Info
-        if (modelLog) printf("output tensors:\n");
+        if (modelLog_) spdlog::info("Output tensors:");
         rknn_tensor_attr output_attrs[io_num.n_output];
         featuremaps_offset.resize(io_num.n_output);
         memset(output_attrs, 0, sizeof(output_attrs));
         for (int i = 0; i < io_num.n_output; i++) {         // there might be 3 outputs for Int8 inference or 1 output for FP16 inference
             output_attrs[i].index = i;              
             ret = rknn_query(ctx, RKNN_QUERY_OUTPUT_ATTR, &(output_attrs[i]), sizeof(rknn_tensor_attr));
-            if (ret != RKNN_SUCC){
-                printf("rknn_query fail! ret=%d\n", ret);
+            if (ret != 0){
+                logger_->error("RKNN query failed! ret={}", ret);
+                spdlog::error("RKNN query failed! ret={}", ret);
                 return -1;
             }
-            if (modelLog) dump_tensor_attr(&(output_attrs[i]));
+            if (modelLog_) dump_tensor_attr(&(output_attrs[i]));
             if (io_num.n_output == 1) {
                 // fp mode infer only have three dims output eg: [bs ,151200, 85]
                 featuremaps_offset[i] = output_attrs[i].dims[1] * output_attrs[i].dims[2];
@@ -242,27 +176,43 @@ public:
             it tells me that it is NHWC format which is weird,
             but the code goes right, so i just leave it there  */
         if (input_attrs[0].fmt == RKNN_TENSOR_NCHW){
-            if (modelLog) printf("model is NCHW input fmt\n");
+            if (modelLog_) spdlog::info("Model is NCHW input fmt");
             app_ctx->model_channel = input_attrs[0].dims[1];
             app_ctx->model_height = input_attrs[0].dims[2];
             app_ctx->model_width = input_attrs[0].dims[3];
         }else{
-            if (modelLog) printf("model is NHWC input fmt\n");
+            if (modelLog_) spdlog::info("Model is NHWC input fmt");
             app_ctx->model_height = input_attrs[0].dims[1];
             app_ctx->model_width = input_attrs[0].dims[2];
             app_ctx->model_channel = input_attrs[0].dims[3];
         }
-        if (modelLog) printf("model input height=%d, width=%d, channel=%d\n",app_ctx->model_height, app_ctx->model_width, app_ctx->model_channel);
+        if (modelLog_) spdlog::info("Model input height={}, width={}, channel={}",app_ctx->model_height, app_ctx->model_width, app_ctx->model_channel);
         return 0;
     }
 
     void worker(promise<bool>& pro){
+        // init log file: auto increase from 0.txt to 1.txt
+        #ifndef DEBUG
+            fs::remove_all(logs_dir);
+        #endif
+        string log_name = get_log_file_name(logs_dir);
+        string log_path = logs_dir + "/" + log_name + ".txt";
+        try {
+            logger_ = spdlog::basic_logger_mt(log_name, log_path);
+            logger_->set_level(spdlog::level::warn);
+        } catch (const spdlog::spdlog_ex &ex) {
+            spdlog::error("Log initialization failed: {}", ex.what());
+            pro.set_value(false);
+            return;
+        }
         int ret = init_model();
         if (ret != 0) {
             pro.set_value(false);
+            return;
         } else {
             pro.set_value(true);
         }
+
         vector<Job> fetched_jobs;
         while(running_){
             {
@@ -277,95 +227,6 @@ public:
                 fetched_jobs.clear();
             }
         }
-    }
-
-    int cvtColor_rga(int& i_head,
-                     size_t& i_size,
-                     image_buffer_t& img_t, 
-                     shared_ptr<unsigned char> imgs_done,
-                     int src_format=RK_FORMAT_BGR_888, 
-                     int dst_format=RK_FORMAT_RGB_888, 
-                     bool log=false){
-        auto release_handle = [] (rga_buffer_handle_t src_handle, rga_buffer_handle_t dst_handle) {
-            if (src_handle) releasebuffer_handle(src_handle);
-            if (dst_handle) releasebuffer_handle(dst_handle);
-        };
-
-        int width = img_t.width;
-        int height = img_t.height;
-        int src_buf_size, dst_buf_size;
-        rga_buffer_t src_img, dst_img;
-        rga_buffer_handle_t src_handle, dst_handle;
-
-        memset(&src_img, 0, sizeof(src_img));
-        memset(&dst_img, 0, sizeof(dst_img));
-
-        src_buf_size = width * height * get_bpp_from_format(src_format);
-        dst_buf_size = width * height * get_bpp_from_format(dst_format);
-        i_size = dst_buf_size;
-
-        shared_ptr<unsigned char> src_buf(new unsigned char[src_buf_size], default_delete<unsigned char[]>());
-        shared_ptr<unsigned char> dst_buf(new unsigned char[src_buf_size], default_delete<unsigned char[]>());
-
-        memcpy(src_buf.get(), img_t.virt_addr, src_buf_size);
-        memset(dst_buf.get(), 0x80, dst_buf_size);
-
-        src_handle = importbuffer_virtualaddr(src_buf.get(), src_buf_size);
-        dst_handle = importbuffer_virtualaddr(dst_buf.get(), dst_buf_size);
-        if (src_handle == 0 || dst_handle == 0) {
-            printf("importbuffer failed!\n");
-            release_handle(src_handle, dst_handle);
-            return -1;
-        }
-
-        src_img = wrapbuffer_handle(src_handle, width, height, src_format);
-        dst_img = wrapbuffer_handle(dst_handle, width, height, dst_format);
-
-        int ret = imcheck(src_img, dst_img, {}, {});
-        if (IM_STATUS_NOERROR != ret) {
-            printf("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-            release_handle(src_handle, dst_handle);
-            return -1;
-        }
-
-        ret = imcvtcolor(src_img, dst_img, src_format, dst_format);
-        if (ret != IM_STATUS_SUCCESS) {
-            printf("Convert COLOR failed, %s\n", imStrError((IM_STATUS)ret));
-            release_handle(src_handle, dst_handle);
-            return -1;
-        }
-
-        memcpy(img_t.virt_addr, dst_buf.get(), dst_buf_size);
-        release_handle(src_handle, dst_handle);
-        return 0;
-    }
-
-    int letterbox_rga(image_buffer_t& src_img, 
-                  image_buffer_t& dst_img, 
-                  letterbox_t& letter_box,
-                  rknn_app_context_t* app_ctx){
-        // prepare dst data
-        memset(&dst_img, 0, sizeof(image_buffer_t));
-        int dst_w = app_ctx->model_width;
-        int dst_h = app_ctx->model_height;
-        int dst_ch = app_ctx->model_channel;
-        int dst_size = dst_w * dst_h * dst_ch;
-        dst_img.width = dst_w;
-        dst_img.height = dst_h;
-        dst_img.format = IMAGE_FORMAT_RGB888;
-        shared_ptr<unsigned char> d_virt_addr(new unsigned char[dst_size], default_delete<unsigned char[]>());
-        dst_img.virt_addr = d_virt_addr.get();
-        dst_img.size = dst_size;
-        
-        // letterbox
-        int bg_color = 114;
-        memset(&letter_box, 0, sizeof(letterbox_t));
-        int ret = convert_image_with_letterbox(&src_img, &dst_img, &letter_box, bg_color);      
-        if (ret < 0) {
-            printf("convert_image_with_letterbox fail! ret=%d\n", ret);
-            return -1;
-        }
-        return 0;
     }
 
     void align_image(Mat& im0, image_buffer_t& tgt_img){
@@ -402,11 +263,102 @@ public:
         }
     }
 
+    int letterbox_rga(image_buffer_t& src_img, 
+                  image_buffer_t& dst_img, 
+                  letterbox_t& letter_box,
+                  rknn_app_context_t* app_ctx){
+        // prepare dst data
+        memset(&dst_img, 0, sizeof(image_buffer_t));
+        int dst_w = app_ctx->model_width;
+        int dst_h = app_ctx->model_height;
+        int dst_ch = app_ctx->model_channel;
+        int dst_size = dst_w * dst_h * dst_ch;
+        dst_img.width = dst_w;
+        dst_img.height = dst_h;
+        dst_img.format = IMAGE_FORMAT_RGB888;
+        shared_ptr<unsigned char> d_virt_addr(new unsigned char[dst_size], default_delete<unsigned char[]>());
+        dst_img.virt_addr = d_virt_addr.get();
+        dst_img.size = dst_size;
+        
+        // letterbox
+        int bg_color = 114;
+        memset(&letter_box, 0, sizeof(letterbox_t));
+        int ret = convert_image_with_letterbox(&src_img, &dst_img, &letter_box, bg_color);      
+        if (ret < 0) {
+            logger_->error("Convert_image_with_letterbox fail! ret={}", ret);
+            spdlog::error("Convert_image_with_letterbox fail! ret={}", ret);
+            return -1;
+        }
+        return 0;
+    }
+
+    int cvtColor_rga(int& i_head,
+                     size_t& i_size,
+                     image_buffer_t& img_t, 
+                     shared_ptr<unsigned char> imgs_done,
+                     int src_format=RK_FORMAT_BGR_888, 
+                     int dst_format=RK_FORMAT_RGB_888){
+        auto release_handle = [] (rga_buffer_handle_t src_handle, rga_buffer_handle_t dst_handle) {
+            if (src_handle) releasebuffer_handle(src_handle);
+            if (dst_handle) releasebuffer_handle(dst_handle);
+        };
+
+        int width = img_t.width;
+        int height = img_t.height;
+        int src_buf_size, dst_buf_size;
+        rga_buffer_t src_img, dst_img;
+        rga_buffer_handle_t src_handle, dst_handle;
+
+        memset(&src_img, 0, sizeof(src_img));
+        memset(&dst_img, 0, sizeof(dst_img));
+
+        src_buf_size = width * height * get_bpp_from_format(src_format);
+        dst_buf_size = width * height * get_bpp_from_format(dst_format);
+        i_size = dst_buf_size;
+
+        shared_ptr<unsigned char> src_buf(new unsigned char[src_buf_size], default_delete<unsigned char[]>());
+        shared_ptr<unsigned char> dst_buf(new unsigned char[src_buf_size], default_delete<unsigned char[]>());
+
+        memcpy(src_buf.get(), img_t.virt_addr, src_buf_size);
+        memset(dst_buf.get(), 0x80, dst_buf_size);
+
+        src_handle = importbuffer_virtualaddr(src_buf.get(), src_buf_size);
+        dst_handle = importbuffer_virtualaddr(dst_buf.get(), dst_buf_size);
+        if (src_handle == 0 || dst_handle == 0) {
+            logger_->error("Importbuffer failed!");
+            spdlog::error("Importbuffer failed!");
+            release_handle(src_handle, dst_handle);
+            return -1;
+        }
+
+        src_img = wrapbuffer_handle(src_handle, width, height, src_format);
+        dst_img = wrapbuffer_handle(dst_handle, width, height, dst_format);
+
+        int ret = imcheck(src_img, dst_img, {}, {});
+        if (ret != IM_STATUS_NOERROR) {
+            logger_->error("Imcheck error!");
+            spdlog::error("Imcheck error!");
+            release_handle(src_handle, dst_handle);
+            return -1;
+        }
+
+        ret = imcvtcolor(src_img, dst_img, src_format, dst_format);
+        if (ret != IM_STATUS_SUCCESS) {
+            logger_->error("Convert color failed, {}", imStrError((IM_STATUS)ret));
+            spdlog::error("Convert color failed, {}", imStrError((IM_STATUS)ret));
+            release_handle(src_handle, dst_handle);
+            return -1;
+        }
+
+        memcpy(img_t.virt_addr, dst_buf.get(), dst_buf_size);
+        release_handle(src_handle, dst_handle);
+        return 0;
+    }
+
     int preprocess_rga(vector<Mat>& im0s, 
                        rknn_input* inputs,  
                        vector<letterbox_t>& letter_boxes, 
-                       rknn_app_context_t* app_ctx,
-                       bool log=false){
+                       rknn_app_context_t* app_ctx){
         int ret;
         int model_width = app_ctx->model_width;
         int model_height = app_ctx->model_height;
@@ -433,7 +385,7 @@ public:
             // convert color from BGR to RGB and copy the converted data to imgs_done
             // ! sleep for about 1-5 ms, otherwise, the rga will go wrong, it is weird, but this is the only solution
             // this_thread::sleep_for(std::chrono::milliseconds(2));
-            ret = cvtColor_rga(i_head, i_size, dst_img, imgs_done, RK_FORMAT_BGR_888, RK_FORMAT_RGB_888, log);
+            ret = cvtColor_rga(i_head, i_size, dst_img, imgs_done, RK_FORMAT_BGR_888, RK_FORMAT_RGB_888);
             if (ret != 0) return ret;
 
             memcpy(imgs_done.get() + i_head, dst_img.virt_addr, i_size);
@@ -448,7 +400,11 @@ public:
         inputs[0].size = total_size;
         inputs[0].buf = imgs_done.get();
         ret = rknn_inputs_set(app_ctx->rknn_ctx, app_ctx->io_num.n_input, inputs);
-        if (ret < 0) return ret;
+        if (ret < 0) {
+            logger_->error("RKNN inputs set failed!");
+            spdlog::error("RKNN inputs set failed!");
+            return ret;
+        }
         return 0;
     }
 
@@ -474,13 +430,13 @@ public:
         letter_box.x_pad = pad_w;
         letter_box.y_pad = pad_h;
         letter_box.scale = scale_factor;
+        return 0;
     }
 
     int preprocess_opencv(vector<Mat>& im0s, 
                     rknn_input* inputs,  
                     vector<letterbox_t>& letter_boxes, 
-                    rknn_app_context_t* app_ctx,
-                    bool log=false){
+                    rknn_app_context_t* app_ctx){
         int ret;
         int model_width = app_ctx->model_width;
         int model_height = app_ctx->model_height;
@@ -511,13 +467,21 @@ public:
         inputs[0].size = total_size;
         inputs[0].buf = imgs_done.get();
         ret = rknn_inputs_set(app_ctx->rknn_ctx, app_ctx->io_num.n_input, inputs);
-        if (ret < 0) return ret;
+        if (ret < 0) {
+            logger_->error("RKNN inputs set failed!");
+            spdlog::error("RKNN inputs set failed!");
+            return ret;
+        }
         return 0;
     }
 
     int do_infer(rknn_app_context_t *app_ctx){
         int ret = rknn_run(app_ctx->rknn_ctx, nullptr);
-        if (ret < 0) return ret;
+        if (ret < 0) {
+            logger_->error("Image infer failed!");
+            spdlog::error("Image infer failed!");
+            return ret;
+        }
         return 0;
     }
     
@@ -529,8 +493,7 @@ public:
                     float nms_threshold,
                     Result& result, 
                     int& output_numbox,
-                    int& output_numprob,
-                    const bool log){
+                    int& output_numprob){
 
         int n_output = app_ctx->io_num.n_output;
         // buf : xywh + conf + cls_prob on 640 * 384 image
@@ -570,7 +533,7 @@ public:
             float image_base_bottom = (bottom - letter_box->y_pad) / letter_box->scale;
             bboxes.push_back({image_base_left, image_base_top, image_base_right, image_base_bottom, (float)label, confidence}); // 放进bboxes中
         }
-        if (log) printf("decoded bboxes.size = %d\n", bboxes.size());
+        if (inferLog_) spdlog::info("Decoded bboxes.size = {}", bboxes.size());
 
         // nms非极大抑制
         // 通过比较索引为5(confidence)的值来将bboxes所有的框排序
@@ -614,7 +577,7 @@ public:
                 }
             }
         }
-        if (log) printf("box_result.size = %d\n", result.boxes.size());
+        if (inferLog_) spdlog::info("box_result.size = {}", result.boxes.size());
     }
 
     void postprocess_i8_3output(int& img_idx,
@@ -623,8 +586,7 @@ public:
                     letterbox_t* letter_box, 
                     float confidence_threshold, 
                     float nms_threshold,
-                    Result& result,
-                    const bool log){
+                    Result& result){
         // set and get some arrtributes
         int stride = 0;
         int grid_h = 0;
@@ -697,7 +659,7 @@ public:
                 }
             }
         }
-        if (log) printf("decoded bboxes.size = %d\n", bboxes.size());
+        if (inferLog_) spdlog::info("Decoded bboxes.size = {}", bboxes.size());
 
         // nms非极大抑制
         // 通过比较索引为5(confidence)的值来将bboxes所有的框排序
@@ -741,7 +703,7 @@ public:
                 }
             }
         }
-        if (log) printf("box_result.size = %d\n", result.boxes.size());
+        if (inferLog_) spdlog::info("box_result.size = {}", result.boxes.size());
     }
 
     // 实际上forward函数是生产者, 异步返回, 在main.cpp中获取结果
@@ -759,12 +721,6 @@ public:
         cv_.notify_one();                                               // 通知worker线程开始工作了
         return fut;                                                     // 等待模型将推理数据返回fut，然后fut再将数据return出去
     }
-
-    void print_time_cost(){
-        int idx = InferImpl::records.size() - 1;
-        printf("Time cost: %.2f ms preprocess, %.2f ms infer, %.2f ms postprocess\n", 
-                InferImpl::records[0][idx], InferImpl::records[1][idx], InferImpl::records[2][idx]);
-    }
     
     void inference(Job& job){
         // define a lamda function that deal with exception circumstance
@@ -777,7 +733,7 @@ public:
         vector<Mat> imgs = job.input_images;
         vector<Result> results;
         results.resize(imgs.size());
-        bool inferLog = job.inferLog;
+        inferLog_ = job.inferLog;
 
         // init some variables
         rknn_input inputs[rknn_app_ctx.io_num.n_input];
@@ -794,8 +750,8 @@ public:
         // use rga instead of opencv to deal with image preprocess, rga can save a lot of cpu usage compared with opencv
         // https://zhuanlan.zhihu.com/p/665203639?utm_campaign=shareopn&utm_medium=social&utm_psn=1753495067145564160&utm_source=wechat_session
         start = time_point::now();
-        // ret = preprocess_rga(imgs, inputs, letter_boxes, &rknn_app_ctx, inferLog); 
-        ret = preprocess_opencv(imgs, inputs, letter_boxes, &rknn_app_ctx);
+        ret = preprocess_rga(imgs, inputs, letter_boxes, &rknn_app_ctx); 
+        // ret = preprocess_opencv(imgs, inputs, letter_boxes, &rknn_app_ctx);
         if (ret != 0) return set_pro_exception(job, results);   
         stop = time_point::now();
         InferImpl::records[0].push_back(micros_cast(stop - start));
@@ -820,9 +776,9 @@ public:
         for (int i = 0; i < batch_size_; ++i){
             Result result;
             if (rknn_app_ctx.is_quant) {
-                postprocess_i8_3output(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result, inferLog);
+                postprocess_i8_3output(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result);
             } else {
-                postprocess_fp_1output(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result, output_numbox, output_numprob, inferLog);
+                postprocess_fp_1output(i, &rknn_app_ctx, outputs, &letter_boxes[i], box_conf_threshold, nms_threshold, result, output_numbox, output_numprob);
             }
             results[i] = result;
         }
@@ -833,7 +789,7 @@ public:
         rknn_outputs_release(rknn_app_ctx.rknn_ctx, rknn_app_ctx.io_num.n_output, outputs);        // 1 for num output
 
         // print time consuming
-        if (inferLog) print_time_cost();
+        if (inferLog_) print_time_cost();
 
         // return results
         job.pro->set_value(results);
@@ -842,10 +798,15 @@ public:
     virtual vector<vector<float>> get_records() override{       // 计时相关, 可删
         return InferImpl::records;
     }
+    
+    void print_time_cost(){
+        int idx = InferImpl::records.size() - 1;
+        spdlog::info("Time cost: {} ms preprocess, {} ms infer, {} ms postprocess", 
+                InferImpl::records[0][idx], InferImpl::records[1][idx], InferImpl::records[2][idx]);
+    }
 
 private:
     // 可调数据
-    bool modelLog;
     string modelPath;                                           // 模型路径
     size_t batch_size;
     float box_conf_threshold{0.5};
@@ -856,13 +817,17 @@ private:
     queue<Job> jobs_;                                           // 任务队列
     mutex lock_;                                                // 负责任务队列线程安全的锁
     condition_variable cv_;                                     // 线程通信函数
-    size_t pool_size{1};
     // 模型初始化有关           
     rknn_app_context_t rknn_app_ctx;
     int batch_size_;
     int output_numbox;                                          // the second dim of the output tensor, eg: [1, 151200, 9]
     int output_numprob;                                         // the third dim of the output tensor, eg: [1, 151200, 9]
     vector<size_t> featuremaps_offset;
+    //日志相关
+    bool modelLog_;                                              // 模型加载时是否打印日志在控制台
+    bool inferLog_;                                              // 模型推理时是否打印日志在控制台
+    std::shared_ptr<spdlog::logger> logger_;                    // logger_负责日志文件, 记录一些错误日志
+    string logs_dir{"logs"};                                    // 日志文件存放的文件夹                        
     // 计时相关
     static vector<vector<float>> records;                       // 计时相关: 静态成员变量声明
 };
