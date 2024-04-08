@@ -2,7 +2,13 @@
 
 注意spdlog在与多线程使用的时候, 需要创建一个全局变量, 以控制每个线程的日志名字都不能一样, 否则会出现错误
 
-安装:
+安装(建议使用源码安装)
+
+```bash
+$ git clone https://github.com/gabime/spdlog.git
+$ cd spdlog && mkdir build && cd build
+$ cmake .. && make -j4 && make install
+```
 
 ```bash
 Debian: sudo apt install libspdlog-dev
@@ -18,6 +24,8 @@ conan: spdlog/[>=1.4.1]
 conda: conda install -c conda-forge spdlog
 build2: depends: spdlog ^1.8.2
 ```
+
+
 
 一些基本使用:
 
@@ -39,10 +47,10 @@ int main() {
     spdlog::set_level(spdlog::level::debug); // Set global log level to debug
     spdlog::debug("This message should be displayed..");    
 
-    // 把日志内容写入文件
-        auto logger = spdlog::basic_logger_mt("basic_logger", "logs/basic-log.txt");
-        logger->info("Welcome to spdlog!");
-        logger->error("Some error message with arg: {}", 1);
+    // 把日志内容写入文件(不会在控制台打印)
+    auto logger = spdlog::basic_logger_mt("basic_logger", "logs/basic-log.txt");
+    logger->info("Welcome to spdlog!");
+    logger->error("Some error message with arg: {}", 1);
     // 更多用法参考官网: https://github.com/gabime/spdlog/tree/v2.x
 
 }
