@@ -109,3 +109,5 @@
 ![](assets/SVM.jpg)
 
 ![](assets/linear.jpg)
+
+![](assets/logistic.jpg)
