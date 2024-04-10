@@ -111,3 +111,5 @@
 ![](assets/linear.jpg)
 
 ![](assets/logistic.jpg)
+
+![](assets/sgd.jpg)
