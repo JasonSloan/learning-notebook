@@ -4,15 +4,8 @@ ps:第111项YOLOv5量化int8
 
 # 一. 安装
 
-python版本安装:
-
-```C++
-pip install openvino-dev[pytorch,onnx]
-```
-
-cpp版本安装:
-
 按照[官网]( https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/download.html?VERSION=v_2023_3_0&OP_SYSTEM=LINUX&DISTRIBUTION=APT)步骤安装openvino(使用apt的方式安装2023版本的)
+注意, 如果想利用CPU的核显, 需要安装[显卡驱动](https://github.com/intel/compute-runtime/releases), 并且, 只支持ubuntu22.04LTS的操作系统([官方适配驱动网页](https://www.intel.cn/content/www/cn/zh/search.html#sort=relevancy&f:@tabfilter=[Downloads]&f:@stm_10385_zh=[%E6%98%BE%E5%8D%A1])中Arc系列的处理器(带有核显的CPU), 只适配ubuntu22.04操作系统)
 
 # 二. OpenVINO流程
 
