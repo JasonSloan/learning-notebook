@@ -2,7 +2,7 @@
 
 ```python
 https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks
-第111项
+https://docs.openvino.ai/2022.3/notebooks/111-yolov5-quantization-migration-with-output.html
 注意此代码适配安装以下版本:
 openvino==2023.1.0
 openvino-dev==2023.1.0
