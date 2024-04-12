@@ -3,6 +3,7 @@
 ```python
 https://github.com/openvinotoolkit/openvino_notebooks/tree/main/notebooks
 第111项
+注意此代码适配安装2022版本的openvino: pip install openvino-dev==2022.3.1
 ```
 
 # 二. 使用方法
