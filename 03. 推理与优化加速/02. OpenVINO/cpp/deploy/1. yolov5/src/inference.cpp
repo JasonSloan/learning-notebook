@@ -78,7 +78,8 @@ public:
                     fetched_jobs.emplace_back(std::move(jobs_.front()));        // 往里面fetched_jobs里塞东西 , std::move将对象的所有权从a转移到b 
                     jobs_.pop();                                                // 从jobs_任务队列中将当前要推理的job给pop出来 
                 }                                
-                for(auto& job : fetched_jobs){                                  // 遍历要推理的job         
+                l.unlock(); 
+				for(auto& job : fetched_jobs){                                  // 遍历要推理的job         
                     auto start_time = std::chrono::high_resolution_clock::now();                            // [&]{inference(job); return;}  
                     inference(job);                                             // 调用inference执行推理
                     auto end_time = std::chrono::high_resolution_clock::now();

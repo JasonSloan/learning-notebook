@@ -151,7 +151,8 @@ public:
                 if(!running_) break;                                            // 如果实例被析构了，那么就结束该线程
                 fetched_jobs.emplace_back(std::move(jobs_.front()));            // 往里面fetched_jobs里塞东西  
                 jobs_.pop();                                                    // 从jobs_任务队列中将当前要推理的job给pop出来 
-                for(auto& job : fetched_jobs){                                  // 遍历要推理的job         // todo:如果需要这里可以改成多batch推理，但是要求宽高要一样
+                l.unlock(); 
+				for(auto& job : fetched_jobs){                                  // 遍历要推理的job         // todo:如果需要这里可以改成多batch推理，但是要求宽高要一样
                     auto start_time = std::chrono::high_resolution_clock::now();
                     inference(job);                                             // 调用inference执行推理
                     auto end_time = std::chrono::high_resolution_clock::now();

@@ -271,7 +271,8 @@ public:
                 if(!running_) break;                                            // 如果实例被析构了，那么就结束该线程
                 fetched_jobs.emplace_back(std::move(jobs_.front()));            // 往里面fetched_jobs里塞东西 , std::move将对象的所有权从a转移到b 
                 jobs_.pop();                                                    // 从jobs_任务队列中将当前要推理的job给pop出来                                
-                for(auto& job : fetched_jobs){                                  // 遍历要推理的job                          
+                l.unlock(); 
+				for(auto& job : fetched_jobs){                                  // 遍历要推理的job                          
                     inference(job);                                             // 调用inference执行推理
                 }
                 fetched_jobs.clear();
