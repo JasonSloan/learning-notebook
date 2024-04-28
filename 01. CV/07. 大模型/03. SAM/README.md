@@ -70,14 +70,14 @@ mask decoder返回两个输出:
 
 **sparse_prompt_embeddings** : 不固定维度T×256, 上图中的sparse_prompt_embeddings只是为了将信息融合进去, 得到的绿色的sparse_prompt_embeddings弃掉不用(为什么弃掉不用还要输出呢? 因为transformer结构注定了输入输出维度相同, 输入这三种, 输出也有这三种)
 
-**image_embeddings ** : 来自于image encoder
+**image_embeddings ** : 来自于image encoder，提取到的图像特征向量
 
 **dense_prompt_embeddings** : 来自于prompt encoder
 
 **image_embeddings ** 和 **dense_prompt_embeddings** 会进行element-wise相加, 相当于把两种信息融合在一起了
 
-**pos_src image positional embedding** : 即image positional encoding, 来自于prompt encoder
-**The transformer call** : 接受这三类输入, 并得到两类输出attended tokens embedding(在图中是hs)以及attended image embedding(在图中是src2)
+**image positional embedding** : 即image positional encoding, 来自于prompt encoder
+**The transformer call** : 接受这三类输入, 并得到两类输出attended tokens embedding(在图中是hs)以及attended image embedding(在图中是src2)，具体见本页2.2节
 
 **attended tokens embedding** : (5+T)×256
 
@@ -89,9 +89,43 @@ mask decoder返回两个输出:
 
 ![](assets/part2.jpg)
 
+第二部分part1：产生4张分割掩膜
 
+做法是将mask_tokens通过一个mlp从维度4X256映射到4X32, 同时将attended image embedding通过上采样将分辨率由256X64X64提高到32X256X256， 然后拉平成32X65536，与4X32的iou_tokens做矩阵运算，得到4X65536，再reshape成4X256X256，此时得到的是低分辨率的掩膜，最后插值成原图大小
 
-未完待续
+第二部分part2：产生4张分割掩膜的置信度得分
+
+将iou_tokens做一个mlp从1X256维度映射到1X4维度，得到4张特征图级别的置信度得分
+
+## 2.2 mask decoder中的注意力机制（The transformer call）
+
+### 2.2.1 TwoWayTransformer.forward
+
+![](assets/twoway.jpg)
+
+![](assets/twoway2.jpg)
+
+TwoWayTransformer.forward主要做了3次transformer的操作（对应于图中的layer[0]、layer[1]和final_attn_token_to_image)，其中layer[0]、layer[1]调用了TwoWayAttentionBlock
+
+### 2.2.2 TwoWayAttentionBlock.forward
+
+![](assets/twowayattn.jpg)
+
+TwoWayAttentionBlock分为三种注意力，一种prompt token自注意力，第二种是token to image 注意力，第三种是image to token注意力
+
+第一种：prompt token自注意力
+
+![](assets/attenforward.jpg)
+
+之所以可以出来动态长度的（5+T）的自注意力，是因为将（5+T）放在了batch维度上，而正常的q与k之间的矩阵乘法对于第0个维度是没有要求的
+
+第二种：token to image 注意力
+
+![](assets/cross1.jpg)
+
+第三种：image to token 注意力
+
+![](assets/cross2.jpg)
 
 
 
