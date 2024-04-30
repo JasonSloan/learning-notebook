@@ -1386,7 +1386,7 @@ int main (){
 推荐写法：
 auto p1 = std:: make_shared<int>(10);  // 推荐这种写法，安全。创建一个share类型的智能指针a，指针指向的值类型为int，值为10
 shared_prt<int> p2(new int(10));    // 另一种创建方式不推荐
-shared_ptr<uchar> p3(new uchar[1024], default_delete<uchar[]>()); //创建一个智能指针并分配一定大小的内存
+shared_ptr<unsigned char> intell_data(new unsigned char[1024], default_delete<unsigned char[]>()); //创建一个智能指针并分配一定大小的内存
 p2.use_count();    // 返回p指针的引用计数
 p2.reset();   // 重置所维护的裸指针
 p2 = p1;      //  可以直接赋值，此时p1和p2的引用计数都为2
