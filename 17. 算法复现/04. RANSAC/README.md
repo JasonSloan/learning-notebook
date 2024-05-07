@@ -65,17 +65,17 @@ RANSAC(RANdom SAmple Consensus,随机采样一致)算法是从一组含有“外
 
 ​	因此公式如下:
 
-​		④迭代1次取到Model_S模型的概率: $\mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}}$
+​		④迭代1次取到Model_S模型的概率: $\mathopen{}\mathrm{ep} \mathclose{}^{\mathrm{num\_points}}$
 
-​		③迭代1次取到非Model_S模型的概率: $1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}}$
+​		③迭代1次取到非Model_S模型的概率: $1 - \mathopen{}\mathrm{ep} \mathclose{}^{\mathrm{num\_points}}$
 
-​		②迭代iter次后, 每次都取到非Model_S模型的概率: $\mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$
+​		②迭代iter次后, 每次都取到非Model_S模型的概率: $\mathopen{}\left( 1 - \mathopen{}\mathrm{ep} \mathclose{}^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$
 
-​		①迭代iter次后, 至少一次能求取到当前模型Model_S的概率: $1 - \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$
+​		①迭代iter次后, 至少一次能求取到当前模型Model_S的概率: $1 - \mathopen{}\left( 1 - \mathopen{}\mathrm{ep} \mathclose{}^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$
 
-​	令: $1 - \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$ > p
+​	令: $1 - \mathopen{}\left( 1 - \mathopen{}\mathrm{ep} \mathclose{}^{\mathrm{num\_points}} \mathclose{}\right)^{\mathrm{iter}}$ > p
 
-​	可得: $\mathrm{iter} >= \frac{\log \mathopen{}\left( 1 - p \mathclose{}\right)}{\log \mathopen{}\left( 1 - \mathopen{}\left( 1 - \mathrm{ep} \mathclose{}\right)^{\mathrm{num\_points}} \mathclose{}\right)}$
+​	可得: $\mathrm{iter} >= \frac{\log \mathopen{}\left( 1 - p \mathclose{}\right)}{\log \mathopen{}\left( 1 - \mathopen{}\mathrm{ep} \mathclose{}^{\mathrm{num\_points}} \mathclose{}\right)}$
 
 ​	其中iter最大迭代次数, p是置信度概率, ep是内点占比, model_points是求取模型所需的最小的点对数
 
