@@ -38,6 +38,13 @@ logger.error("This is error")
 ```C++
 # 自定义日志输出格式
 logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO")
+# 一个自定义的比较美观的日志输出格式
+loguru_format = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+    "<level>{level: <8}</level> | "
+    "<cyan>{name}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+)
+logger.add(sys.stderr, format=loguru_format, level="INFO")
 ```
 
 ```python
