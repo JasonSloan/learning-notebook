@@ -1,3 +1,5 @@
+[参考链接](https://mp.weixin.qq.com/s/gUOaxlIC2LjMlkTm0NvcVA)
+
 ![](assets/model.jpg)
 
 # 一. 模型结构
@@ -9,6 +11,8 @@
 ### 1.1 image encoder
 
 ![](assets/vit.jpg)
+
+![](assets/encoder.jpg)
 
 image encoder就是ViT, 只不过没有了多余的[cls]的embedding(上图中"0*"的位置),  然后图像在做运算的时候没有展平成[N, T, E]的维度, 而是一直保持[N, C, H, W]的维度。
 
