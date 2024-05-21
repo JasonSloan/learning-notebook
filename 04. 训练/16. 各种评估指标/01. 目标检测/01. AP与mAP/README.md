@@ -12,9 +12,9 @@
 
 **FN** : 漏检的gt框
 
-$ Precision=\frac{TP}{TP+FP} = \frac{TP}{alldetections}$
+$Precision=\frac{TP}{TP+FP} = \frac{TP}{alldetections}$
 
-$ Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
+$Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
 
  **Figure1** : 虽然bb1和bb2与gt的交并比都大于0.5(假设IoU_threshold为0.5), 但是bb1为TP, bb2为FP
 
