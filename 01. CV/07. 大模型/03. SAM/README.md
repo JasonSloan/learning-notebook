@@ -10,13 +10,13 @@
 
 ### 1.1 image encoder
 
-![](assets/vit.jpg)
-
 ![](assets/encoder.jpg)
 
 image encoder就是ViT, 只不过没有了多余的[cls]的embedding(上图中"0*"的位置),  然后图像在做运算的时候没有展平成[N, T, E]的维度, 而是一直保持[N, C, H, W]的维度。
 
 image encoder输入图像维度[bs, 3, 1024, 1024] (把原图做了个letterbox), 输出维度为[bs, 256, 64, 64] (假设为ViT_b模型)
+
+![](assets/vit.jpg)
 
 ### 1.2 prompt encoder
 
