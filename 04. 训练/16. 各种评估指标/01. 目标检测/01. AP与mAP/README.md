@@ -76,7 +76,7 @@ $ Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
 
 然后,  假如我们取到了第n种recall的取值，我们再往后看直到发现出现了不同的recall，然后我们在这个区间里找到最大的precision，然后用这个最大的precision和这个区间长度相乘作为这段区间的AP，然后我们遍历所有的区间然后把每段的AP加起来就得到了最后的AP
 
-代码如下:
+示例代码如下:
 
 ```python
 def voc_ap(rec, prec, use_07_metric=False):
