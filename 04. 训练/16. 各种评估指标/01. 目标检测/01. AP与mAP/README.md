@@ -1,5 +1,4 @@
 ## 目标检测中的评估指标
-[参考链接](https://blog.csdn.net/qq_40959462/article/details/127451374?spm=1001.2014.3001.5506)
 
 ## 一. AP(以下指标假设都只针对一个类别)
 
@@ -13,9 +12,9 @@
 
 **FN** : 漏检的gt框
 
-$Precision=\frac{TP}{TP+FP} = \frac{TP}{alldetections}$
+$ Precision=\frac{TP}{TP+FP} = \frac{TP}{alldetections}$
 
-$Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
+$ Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
 
  **Figure1** : 虽然bb1和bb2与gt的交并比都大于0.5(假设IoU_threshold为0.5), 但是bb1为TP, bb2为FP
 
@@ -51,9 +50,9 @@ $Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
 
 从置信度最高的框开始, 依次包含下一个bounding_box, 计算涵盖的bounding_box的Precision、Recall
 
-$Precision=\frac{TP}{TP+FP} = \frac{TP}{alldetections}$
+$ Precision=\frac{TP}{TP+FP} = \frac{TP}{alldetections}$
 
-$Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
+$ Recall=\frac{TP}{TP+FN}=\frac{TP}{all\ ground\ truths}$
 
 简单提下看最前面的两个框。取到第一个框的时候我们的all detections就是1正好我们这个框就是TP，所以我们这里的precision就是1，然后再取一个框，但是这个框是FP，所有我们的TP数目还是1，但是我们的all detections就变成2了所以我们的precision这个时候变成了0.5, 以此类推
 
