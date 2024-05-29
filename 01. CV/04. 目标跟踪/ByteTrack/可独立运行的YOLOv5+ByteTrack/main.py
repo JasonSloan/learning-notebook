@@ -15,10 +15,10 @@ def draw_rectangles(output_results, frame):
         cv2.imwrite("output.jpg", frame)
 
 
-def track(frame, detector, tracker):
+def track(frame, tgt_cls, detector, tracker):
     im0_size = frame.shape[:2]
     output_results = detector.infer(frame)
-    output_results = output_results[output_results[..., 5] == 2][..., :5]    # only keep type 2 (person)
+    output_results = output_results[output_results[..., 5] == tgt_cls][..., :5]    # only keep tgt_cls (person)
     # draw_rectangles(output_results, frame)
     tracks = tracker.update(output_results, im0_size, im0_size)
     return tracks
@@ -52,7 +52,7 @@ def synthesis_video_with_trackids(video_path, frame_ids, tlwhs, trackids, output
     cap.release()
 
 
-def main(video_path, cfg, weight, conf_thre, iou_thre, input_size, track_thresh, match_thresh, track_buffer, min_box_area, output_video_path):
+def main(video_path, cfg, weight, tgt_cls, conf_thre, iou_thre, input_size, track_thresh, match_thresh, track_buffer, min_box_area, output_video_path):
     detector = InferenceController(cfg, weight, conf_thre, iou_thre, input_size)
     tracker = BYTETracker(track_thresh, match_thresh, track_buffer, frame_rate=30)
 
@@ -64,7 +64,7 @@ def main(video_path, cfg, weight, conf_thre, iou_thre, input_size, track_thresh,
         ret, frame = cap.read()
         if not ret:
             break
-        online_targets = track(frame, detector, tracker)
+        online_targets = track(frame, tgt_cls, detector, tracker)
         saved = False
         ionline_tlwhs, ionline_ids, ionline_scores = [], [] ,[]
         for t in online_targets:
@@ -88,10 +88,11 @@ def main(video_path, cfg, weight, conf_thre, iou_thre, input_size, track_thresh,
         
 
 def parse_args():
-    parser = ArgumentParser(description="Tracking demo")
+    parser = ArgumentParser(description="Tracking demo. 注意!!!!!!权重文件应该只保存state_dict而不是整个模型, 否则会报错")
     parser.add_argument("--video_path", type=str, default="videos/palace.mp4",help="Path to your video")
     parser.add_argument("--cfg", type=str, default="yolov5-bytetrack/cfg/yolov5s.yaml", help="Path to the yolov5 detector config file")
-    parser.add_argument("--weight", type=str, default="yolov5-bytetrack/weights/yolov5s.pt", help="Path to the yolov5 detector weight(stores state_dict only)")
+    parser.add_argument("--weight", type=str, default="yolov5-bytetrack/weights/yolov5s.pt", help="Path to the yolov5 detector weight()")
+    parser.add_argument("--tgt_cls", type=int, default=0, help="Target class index to track(default 0 means track person only)")
     parser.add_argument("--conf_thre", type=float, default=0.01, help="Confidence threshold of the detector(this value should be extremely small)")
     parser.add_argument("--iou_thre", type=float, default=0.4, help="Detectior nms iou threshold")
     parser.add_argument("--input_size", type=int, nargs='+', default=[384, 640], help="Detector input size")
