@@ -19,6 +19,19 @@ print(tensor)
 
 ### 2. torch.gather
 
+对于一个tensor, 指定某一维度, 按照指定索引获得数据并聚集到一起
+
+```python
+>>> tensor = torch.arange(12).reshape(3,4)
+>>> tensor
+tensor([[ 0,  1,  2,  3],
+        [ 4,  5,  6,  7],
+        [ 8,  9, 10, 11]])
+>>> idx = torch.tensor([[0, 2, 2]])	# 将第1行索引为0, 第2行索引为2, 第3行索引为2的元素gather到一起
+>>> torch.gather(tensor, 0, idx)	# dim指定为0(指定为1会出现奇怪的结果)
+tensor([[ 0, 6, 10]])				
+```
+
 ### 3. 使用nn.Embedding代替nn.Parameter
 
 ### 4. F.interpolate
