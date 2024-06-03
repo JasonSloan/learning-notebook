@@ -32,16 +32,16 @@ tensor([[ 0,  1,  2,  3],
 tensor([[ 0, 6, 10]])				
 ```
 
-### 3. 使用nn.Embedding代替nn.Parameter
+### 2. 使用nn.Embedding代替nn.Parameter
 
 在构建模型时, 有的时候有些tensor变量需要再init中声明, 然后在forward中使用, 而且该变量需要可以梯度更新, 常用做法是使用nn.Parameter, 但是使用nn.Embedding会更方便
 
 ```python
-nn.Parameter(torch.rand(2,3), requires_grad=True)
+>>> nn.Parameter(torch.rand(2,3), requires_grad=True)
 Parameter containing:
 tensor([[0.5926, 0.3559, 0.1848],
         [0.6024, 0.4757, 0.2214]], requires_grad=True)
-nn.Embedding(2,3).weight
+>>> nn.Embedding(2,3).weight
 Parameter containing:
 tensor([[ 0.0274,  1.2454,  0.2842],
         [-0.4236,  0.5645, -1.9724]], requires_grad=True)
@@ -104,6 +104,48 @@ tensor([[[[ 0.0000,  0.7000,  1.5000,  2.3000,  3.0000],
           [18.4000, 19.1000, 19.9000, 20.7000, 21.4000],
           [20.0000, 20.7000, 21.5000, 22.3000, 23.0000]]]])
 
+```
+
+### 5. tensor.cumsum
+
+将张量沿着某一个维度进行累加
+
+```python
+>>> tensor = torch.arange(12).reshape(3,4)
+>>> tensor
+tensor([[ 0,  1,  2,  3],
+        [ 4,  5,  6,  7],
+        [ 8,  9, 10, 11]])
+>>> tensor.cumsum(0)
+tensor([[ 0,  1,  2,  3],
+        [ 4,  6,  8, 10],
+        [12, 15, 18, 21]])
+>>> tensor.cumsum(1)
+tensor([[ 0,  1,  3,  6],
+        [ 4,  9, 15, 22],
+        [ 8, 17, 27, 38]])
+```
+
+### 6. tensor.expand
+
+按照指定shape将当前tensor进行复制
+
+```python
+>>> tensor = torch.arange(6).reshape(1,2,3)
+>>> tensor
+tensor([[[0, 1, 2],
+         [3, 4, 5]]])
+>>> tensor.expand(2, -1, -1)			# 0维度上重复2次, 1维度和2维度保持不变
+tensor([[[0, 1, 2],
+         [3, 4, 5]],
+        [[0, 1, 2],
+         [3, 4, 5]]])
+>>> reference = torch.randn(2, 2, 3)
+>>> tensor.expand_as(reference)			# 按照reference的shape对tensor进行扩展
+tensor([[[0, 1, 2],
+         [3, 4, 5]],
+        [[0, 1, 2],
+         [3, 4, 5]]])
 ```
 
 
