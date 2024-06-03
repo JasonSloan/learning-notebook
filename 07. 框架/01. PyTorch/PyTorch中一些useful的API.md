@@ -34,6 +34,40 @@ tensor([[ 0, 6, 10]])
 
 ### 3. 使用nn.Embedding代替nn.Parameter
 
+在构建模型时, 有的时候有些tensor变量需要再init中声明, 然后在forward中使用, 而且该变量需要可以梯度更新, 常用做法是使用nn.Parameter, 但是使用nn.Embedding会更方便
+
+```python
+nn.Parameter(torch.rand(2,3), requires_grad=True)
+Parameter containing:
+tensor([[0.5926, 0.3559, 0.1848],
+        [0.6024, 0.4757, 0.2214]], requires_grad=True)
+nn.Embedding(2,3).weight
+Parameter containing:
+tensor([[ 0.0274,  1.2454,  0.2842],
+        [-0.4236,  0.5645, -1.9724]], requires_grad=True)
+
+
+# 下面的例子使用nn.Embedding代替nn.Parameter
+class Model(nn.Module):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        # self.embedding = nn.Parameter(torch.randn(1, 3, 1, 1), requires_grad=True)
+        self.embedding = nn.Embedding(1, 3).weight.unsqueeze(-1).unsqueeze(-1)
+        self.conv = nn.Conv2d(3, 128, 3, 1, 1)
+        self.bn = nn.BatchNorm2d(128)
+        self.act = nn.ReLU(inplace=True)
+    
+    def forward(self, x):
+        x += self.embedding
+        return self.act(self.bn(self.conv(x)))
+
+if __name__ == "__main__":
+    dummy = torch.randn(1, 3, 640, 640)
+    model = Model()
+    model(dummy)
+
+```
+
 ### 4. F.interpolate
 
 对于一个tensor（至少为3维）, 在最后一个（或最后两个）维度进行插值（取决于是单线性插值还是双线性插值）
