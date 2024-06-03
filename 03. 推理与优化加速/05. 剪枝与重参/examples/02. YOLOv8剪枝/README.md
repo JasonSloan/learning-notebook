@@ -43,16 +43,19 @@ BN层的具体操作有两部分：
 ```python
                 # # ============================= sparsity training ========================== #
                 if self.sr is not None:
+            		# 线性衰减的L1正则化系数
                     srtmp = self.sr * (1 - 0.9 * self.epoch / self.epochs)  
                     ignore_bn_list = []
                     for k, m in self.model.named_modules():
                         if isinstance(m, Bottleneck):
-                            if m.add:               
-                                ignore_bn_list.append(k + '.cv1.bn')                   
-                                ignore_bn_list.append(k + '.cv2.bn')                   
+                            # 只有Bottleneck模块(对应于网络结构图中的Res Unit)中才做add操作(不剪)
+                            if m.add:    
+                                # C2f模块中的第一个卷积层的bn层
+                                ignore_bn_list.append(k.rsplit(".", 2)[0] + ".cv1.bn") 
+                                # C2f模块中的BottleNeck模块中的第二个卷积层
+                                ignore_bn_list.append(k + '.cv2.bn')                    
                         if isinstance(m, nn.BatchNorm2d) and (k not in ignore_bn_list):
                             m.weight.grad.data.add_(srtmp * torch.sign(m.weight.data))  # L1
-                            # m.bias.grad.data.add_(opt.sr * 10 * torch.sign(m.bias.data))  
                 # # ============================= sparsity training ========================== #
 ```
 
