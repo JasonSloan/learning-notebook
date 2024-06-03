@@ -1,8 +1,6 @@
-完整代码: https://github.com/midasklr/yolov5prune
-
 # YOLOv5基于BN层的剪枝
 
-完整代码: https://github.com/midasklr/yolov5prune
+Reference完整代码: https://github.com/midasklr/yolov5prune
 
 ## 1. 整体思路
 
@@ -32,10 +30,11 @@ if opt.st:
         if isinstance(m, Bottleneck):
              # 只有Bottleneck模块(对应于网络结构图中的Res Unit)中才做add操作, 所以不能剪
             if m.add:       
-                # C3模块中的BottleNeck模块中的第一个卷积层
-                ignore_bn_list.append(k + '.cv1.bn')   
+                # C3模块中的第一个卷积层
+                ignore_bn_list.append(k.rsplit(".", 2)[0] + ".cv1.bn")
+                # ignore_bn_list.append(k + '.cv1.bn')  # 源代码中该行应注释, 对应于prune.py中该行也应注释 	
                 # C3模块中的BottleNeck模块中的第二个卷积层
-                ignore_bn_list.append(k + '.cv2.bn')                    
+                ignore_bn_list.append(k + '.cv2.bn')  
                 if isinstance(m, nn.BatchNorm2d) and (k not in ignore_bn_list):
                     m.weight.grad.data.add_(srtmp * torch.sign(m.weight.data))  # L1
 ```
