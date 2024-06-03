@@ -356,7 +356,7 @@ class BaseTrainer:
                 # Backward
                 self.scaler.scale(self.loss).backward()
                 
-                # # ============================= sparsity training ========================== #
+                # ============================= sparsity training ========================== 
                 if self.sr is not None:
                     # 不加L1正则的bn层为: 所有C3模块中的第一个卷积层的bn层, 以及C3模块中的BottleNeck模块中的所有卷积层
                     srtmp = self.sr * (1 - 0.9 * self.epoch / self.epochs)  # 线性衰减的L1正则化系数
@@ -364,13 +364,11 @@ class BaseTrainer:
                     for k, m in self.model.named_modules():
                         if isinstance(m, Bottleneck):
                             if m.add:               # 只有Bottleneck模块(对应于网络结构图中的Res Unit)中才做add操作, 所以不能剪
-                                # ignore_bn_list.append(k.rsplit(".", 2)[0] + ".cv1.bn")  # C3模块中的第一个卷积层的bn层
-                                ignore_bn_list.append(k + '.cv1.bn')                    # C3模块中的BottleNeck模块中的第一个卷积层
+                                ignore_bn_list.append(k.rsplit(".", 2)[0] + ".cv1.bn")  # C3模块中的第一个卷积层的bn层
                                 ignore_bn_list.append(k + '.cv2.bn')                    # C3模块中的BottleNeck模块中的第二个卷积层
                         if isinstance(m, nn.BatchNorm2d) and (k not in ignore_bn_list):
                             m.weight.grad.data.add_(srtmp * torch.sign(m.weight.data))  # L1
-                            # m.bias.grad.data.add_(opt.sr * 10 * torch.sign(m.bias.data))  
-                # # ============================= sparsity training ========================== #
+                # ============================= sparsity training ========================== 
                 
                 # Optimize - https://pytorch.org/docs/master/notes/amp_examples.html
                 if ni - last_opt_step >= self.accumulate:
