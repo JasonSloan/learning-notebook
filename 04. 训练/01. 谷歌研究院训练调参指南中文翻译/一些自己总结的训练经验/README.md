@@ -1,3 +1,5 @@
+[网上总结的一些训练经验](https://www.zhihu.com/question/25097993/answer/3410497378?utm_campaign=shareopn&utm_medium=social&utm_psn=1781226666696081408&utm_source=wechat_session)
+
 ## 一. 对比实验:
 
 ![](assets/contrast_experiment.jpg)
@@ -25,10 +27,6 @@ focal_loss有用;
 从低分辨率的最优超参数训出的模型不如官方最优超参数训出的;
 
 冻结参数过多;
-
-只用预训练模型;
-
-只训开源数据集;
 
 ### 3. 是否有用视情况而定的操作:
 
