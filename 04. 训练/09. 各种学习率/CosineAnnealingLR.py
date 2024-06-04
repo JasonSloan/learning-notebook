@@ -11,7 +11,7 @@ if __name__ == "__main__":
     min_lr = 0.001
     resnet = resnet18()
     optimizer = Adam(resnet.parameters(), lr=init_lr)
-    lr_scheduler = CosineAnnealingLR(optimizer, epochs, eta_min=min_lr)
+    lr_scheduler = CosineAnnealingLR(optimizer, 32, eta_min=min_lr)
     lrs = []
     for i in range(epochs):
         current_lr = lr_scheduler.get_lr()
@@ -23,4 +23,4 @@ if __name__ == "__main__":
     plt.xlabel('epochs')
     plt.ylabel('lr')
     plt.legend()
-    plt.savefig("lr.jpg")
+    plt.savefig("cosine.jpg")

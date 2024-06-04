@@ -7,9 +7,9 @@ def one_cycle(y1=0.0, y2=1.0, steps=100):
 
 
 if __name__ == '__main__':
-    lf = one_cycle(1, 0.01, 100)
+    lf = one_cycle(1, 0.01, 32)
     for i in range(100):
         plt.plot(i, lf(i), 'ro')
     plt.xlabel("epochs")
     plt.ylabel("lr")
-    plt.savefig('one_cycle.png')
+    plt.savefig('one_cycle.jpg')

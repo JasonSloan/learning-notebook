@@ -82,6 +82,8 @@
 
 ## 六. IoU、GIoU、DIoU、CIoU、SIoU代码实现
 
+目标检测版本:
+
 ```python
 def bbox_iou(box1, box2, x1y1x2y2=True, GIoU=False, DIoU=False, CIoU=False, SIoU=False, eps=1e-7):
     # Returns the IoU of box1 to box2. box1 is 4, box2 is nx4
@@ -145,5 +147,36 @@ def bbox_iou(box1, box2, x1y1x2y2=True, GIoU=False, DIoU=False, CIoU=False, SIoU
         return iou - 0.5 * (distance_cost + shape_cost) #siou
     else:
         return iou  # IoU
+```
+
+语义分割版本:
+
+```python
+import torch
+import torch.nn as nn
+
+
+class IOU(nn.Module):
+    def __init__(self):
+        super(IOU, self).__init__()
+
+    def _iou(self, pred, target):
+        pred = torch.sigmoid(pred)
+        inter = (pred * target).sum(dim=(2, 3))
+        union = (pred + target).sum(dim=(2, 3)) - inter
+        iou = 1 - (inter / union)
+        return iou.mean()
+
+    def forward(self, pred, target):
+        return self._iou(pred, target)
+    
+
+if __name__ == "__main__":
+    pred = torch.rand(1, 3, 640, 640)
+    label = torch.zeros(1, 3, 640, 640)
+    label[:, :, 100:200, 100:200] = 1
+    loss_fn = IOU()
+    loss = loss_fn(pred, label)
+    print(loss)
 ```
 
