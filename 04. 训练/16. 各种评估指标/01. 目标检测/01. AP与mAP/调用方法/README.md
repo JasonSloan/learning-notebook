@@ -1,5 +1,7 @@
 ## 使用方法
 
+### 方式一:
+
 步骤一: 
 
 坐标格式转换(convert文件夹下)
@@ -37,3 +39,29 @@ python pascalvoc.py -gt ../convert/gt-output -det ../convert/dt-output -gtformat
 ![](assets/ob.jpg)
 
 ![](assets/yolov5.jpg)
+
+
+
+### 方式二:
+
+使用cocoapi进行评估
+
+安装cocoapi:
+
+```bash
+pip3 install cython
+pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
+```
+
+创建coco格式的标注文件annotations.json(详情见该文件), 其中bbox为xc、yc、w、h形式, area和iscrowd是必须字段;
+
+创建coco格式的预测值文件predictions.json(详情见该文件), 其中bbox也为xc、yc、w、h形式;
+
+评估的API见cocoapi.py
+
+
+
+
+
+
+
