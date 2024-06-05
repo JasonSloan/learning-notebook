@@ -5,7 +5,10 @@
 todo: 尚未想明白的问题
 
 1. 相对位置特征relative postional embedding是什么意思，为什么加这个，它和正常的正余弦叠加的positional_embedding比有什么好处？[参考链接](https://www.youtube.com/watch?v=7XHucAvHNKs)
-2. ​
+
+# 0. 微调方法
+
+[Adapter/LoRA微调方式微调SAM到其他语义分割数据](https://github.com/KidsWithTokens/Medical-SAM-Adapter)
 
 # 一. 模型结构
 
