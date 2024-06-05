@@ -1,4 +1,4 @@
-[参考链接](https://mp.weixin.qq.com/s/gUOaxlIC2LjMlkTm0NvcVA)
+[参考链接<从零解读SAM大模型>](https://mp.weixin.qq.com/s/gUOaxlIC2LjMlkTm0NvcVA)
 
 ![](assets/model.jpg)
 
