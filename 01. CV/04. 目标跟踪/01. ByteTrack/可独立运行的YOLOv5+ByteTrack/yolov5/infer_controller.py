@@ -1,6 +1,10 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent))
+
 import cv2
 import torch
 import torchvision
@@ -63,7 +67,7 @@ class InferenceController:
         top, bottom = round(dh - 0.1), round(dh + 0.1)
         img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=[114, 114, 114])
         self.im0_shape = (h0, w0)               # 给clip_boxes用
-        self.ratio_pad = [r, [left, top]]
+        self.ratio_pad = [r, [left, top, right, bottom]]
         return img
     
     def non_max_suppression(self, pred):
@@ -96,8 +100,10 @@ class InferenceController:
         gain = self.ratio_pad[0]
         pad = self.ratio_pad[1]
 
-        boxes[:, [0, 2]] -= pad[0]  # x padding
-        boxes[:, [1, 3]] -= pad[1]  # y padding
+        boxes[:, 0] -= pad[0]  # x1 padding
+        boxes[:, 1] -= pad[1]  # y1 padding
+        boxes[:, 2] -= pad[2]  # x2 padding
+        boxes[:, 3] -= pad[3]  # y2 padding
         boxes /= gain
         boxes = self.clip_boxes(boxes)
         return boxes
@@ -113,8 +119,8 @@ class InferenceController:
         return boxes
     
     def xywh2xyxy(self, boxes):
-        xy = boxes[..., :2]
-        wh = boxes[..., 2:]
+        xy = boxes[..., :2].clone()
+        wh = boxes[..., 2:].clone()
         boxes[..., :2] = xy - wh / 2
         boxes[..., 2:] = xy + wh / 2
         return boxes
