@@ -46,6 +46,9 @@ CSDN文档：https://blog.csdn.net/m0_46090675/article/details/121846718?ops_req
 
 步骤：
 如果出现permission denied 就使用sudo
+或者将当前用户添加到docker用户组
+newgrp docker
+sudo usermod -aG docker ${USER}
 命令行登陆docker:
 sudo docker login -u <username>        (我的docker hub的username是jasonsloan)
 启动docker服务
