@@ -148,5 +148,21 @@ tensor([[[0, 1, 2],
          [3, 4, 5]]])
 ```
 
+### 7. torch.einsum
 
+使用爱因斯坦表示法对矩阵做运算，爱因斯坦表示法见[本仓库数学基础](https://github.com/JasonSloan/learning-notebook/tree/main/15.%20%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80)
+
+```python
+>>> a = torch.randn(2,3)
+>>> b = torch.randn(3,4)
+>>> torch.einsum('ij, jk->ik', a, b)
+tensor([[ 1.0298,  2.3074, -0.3171,  0.8465],
+        [ 0.7611,  0.0452,  0.3686,  0.5558]])
+>>> torch.einsum('ij, jk->i', a, b)
+tensor([3.8667, 1.7306])
+
+>>> a = torch.randn(2,3,4,5)
+>>> b = torch.randn(2,3,4,5)
+>>> torch.einsum('ijkl, ijtl->iktl',a,b)		# 高维矩阵指定某两个维度做矩阵乘法
+```
 
