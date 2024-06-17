@@ -1,5 +1,7 @@
 [参考链接<从零解读SAM大模型>](https://mp.weixin.qq.com/s/gUOaxlIC2LjMlkTm0NvcVA)
 
+[ 超棒！SAM相关扩展工作合集](https://github.com/Hedlen/awesome-segment-anything)
+
 ![](assets/model.jpg)
 
 todo: 尚未想明白的问题
