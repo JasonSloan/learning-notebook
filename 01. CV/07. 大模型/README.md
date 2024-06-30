@@ -1,3 +1,7 @@
+[ViT-Pytorch：API的方式调用各种视觉大模型](https://github.com/lucidrains/vit-pytorch)
+
+![](assets/vitpytorch.jpg)
+
 # 大模型微调方法
 
 ![](assets/finetune.jpg)
