@@ -102,6 +102,8 @@ class LayerNormalization(nn.Module):
 
 ![](assets/feed_forward.jpg)
 
+主要作用就是做一个非线性转换（因为attention模块中的矩阵运算全部是线性的）
+
 ```python
 # Creating Feed Forward Layers
 class FeedForwardBlock(nn.Module):
@@ -122,6 +124,8 @@ class FeedForwardBlock(nn.Module):
 ## 5. multi-head attention
 
 ![](assets/multi_head_attention.jpg)
+
+主要作用就是实现多头自注意力，为什么要多头？因为可以实现每个头关注不同语义的目的，比如在图像中，可能有些时候需要模型更关注图片中的天空，有的时候需要模型更关注图片中的人，有的时候需要模型更关注图片中的车等等，多头可以实现每个头关注点不一样。
 
 多头注意力模块接收分为查询、键和值的输入数据，并组织成矩阵 𝑄、𝐾 和 𝑉。每个矩阵包含输入的不同方面，并且它们具有与输入相同的维度。
 
@@ -203,6 +207,8 @@ class MultiHeadAttentionBlock(nn.Module):
 ## 6. Add & Norm
 
 ![](assets/add_norm.jpg)
+
+主要实现残差连接，防止梯度消失梯度爆炸。
 
 ```python
 # Building Residual Connection
