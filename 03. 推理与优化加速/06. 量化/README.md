@@ -8,7 +8,7 @@
 
 对于int8类型的任意数据([-128,127]之间的值), 将其归一化到0-1之间: $$\frac{Qmax-Q}{Qmax-Qmin}$$
 
-令$$\frac{Qmax-Q}{Qmax-Qmin}$$ = $$\frac{Xmax-X}{Xmax-Xmin}$$  , 则可求得:
+令$$\frac{Qmax-Q}{Qmax-Qmin} = \frac{Xmax-X}{Xmax-Xmin}$$  , 则可求得:
 
 $$Q=Qmax- \frac{Qmax - Qmin}{ Xmax - Xmin} * (Xmax - X)$$
 
