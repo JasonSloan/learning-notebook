@@ -2,7 +2,7 @@
 
 **必须使用mobaXterm的终端运行，防止一些不必要的麻烦。且只能在宿主机中运行, 不能在容器中运行**
 
-**[链接](https://pan.baidu.com/s/1NMrTg2xF2CZK9aCNi--2_A)：  提取码：xmbw**
+**[mobaXterm链接](https://pan.baidu.com/s/1NMrTg2xF2CZK9aCNi--2_A)：  提取码：xmbw**
 
 创建一个虚拟的conda环境
 
