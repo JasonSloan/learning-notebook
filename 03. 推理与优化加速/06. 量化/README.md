@@ -206,7 +206,7 @@ if __name__ == "__main__":
         avg = np.sum(x_hist_split) / np.count_nonzero(x_hist_split) # 计算每一份的的平均值(值为0的排除在外)
         for item in x_hist_split:
             if item != 0:
-                x_hist_reversed.append(item)    # 值不为0的添加平均数
+                x_hist_reversed.append(avg.item())    # 值不为0的添加平均数
                 continue
             x_hist_reversed.append(0)   # 值为0的依然添加0
     x_prob = x_hist / np.sum(x_hist)    # 将bins的频数转换为概率
@@ -215,9 +215,59 @@ if __name__ == "__main__":
     print(kl_value)
 ```
 
-上面这种计算方式还有个问题, 那就是, 根据KL散度的计算公式, $${Q(x_i)}$$作为分母, 值却很可能为0, 这样计算出的KL散度值很有可能出现nan
+上面这种计算方式还有个问题, 那就是, 根据KL散度的计算公式, $${Q(x_i)}$$作为分母值却很可能为0,  同时 $$P(x_i)$$ 作为分也很可能为0(log的值永远大于0), 这样计算出的KL散度值很有可能出现nan
 
  $$ D_{KL} = \sum_i P(x_i) \log(\frac{P(x_i)}{Q(x_i)})$$
+
+一个常规的解决思路就是在分母上加一个极小值epsilon, 但是这样会带来一个新的问题, 因为  $${Q(x_i)}$$ 代表的是某个bins的概率值, 如果为它加上一个epsilon, 那么 $$\sum_i Q(x_i)$$ 之和将不等于1, 而是等于  $$\sum_i (Q(x_i) + eps) = \sum_i (Q(x_i) )+ \sum_i(eps) = 1 + \sum_i(eps)$$  , 因此解决办法就是将概率为0的位置加一个epsilon, 同时将这个epsilon平均分到每个概率不为0的bins上扣除; 对于 $$P(x_i)$$ 也同理
+
+```python
+import numpy as np
+
+
+def cal_kl(p, q):
+    assert len(p) == len(q), "length of p must be equal with length of q"
+    kl_value = 0.
+    for i in range(len(p)):
+        if q[i] == 0.:
+            print()
+        kl_value += p[i] * np.log(p[i] / q[i])
+    return kl_value
+
+
+def smooth_data(q, eps=1e-5):
+    zeros_mask = q == 0
+    nonzeros_mask = q != 0
+    q[zeros_mask] += eps
+    eps_sub = eps * zeros_mask.size / nonzeros_mask.size
+    q[nonzeros_mask] -= eps_sub
+    return q
+    
+
+if __name__ == "__main__":
+    x = np.random.randn(3000)
+    x_bins = 2560
+    x_hist, _ = np.histogram(x, x_bins) # 将x划分到2560个bins中
+    q_bins = 256
+    x_hist_splits = np.array_split(x_hist, q_bins)   # 将x_hist等分成256份
+    x_hist_reversed = []    # x_hist_reversed为反映射回2560个bins的x_hist
+    for x_hist_split in x_hist_splits:  # 遍历每一份
+        if np.count_nonzero(x_hist_split) != 0:
+            avg = np.sum(x_hist_split) / np.count_nonzero(x_hist_split) # 计算每一份的的平均值(值为0的排除在外)
+        for item in x_hist_split:
+            if item != 0:
+                x_hist_reversed.append(avg.item())    # 值不为0的添加平均数
+                continue
+            x_hist_reversed.append(0)   # 值为0的依然添加0
+    x_prob = x_hist / np.sum(x_hist)    # 将bins的频数转换为概率
+    x_reversed_prob = x_hist_reversed / np.sum(x_hist_reversed) 
+    x_prob = smooth_data(x_prob)
+    x_reversed_prob = smooth_data(x_reversed_prob)
+    kl_value = cal_kl(x_prob, x_reversed_prob)  # 计算KL散度
+    print(kl_value)
+```
+
+
 
 
 
