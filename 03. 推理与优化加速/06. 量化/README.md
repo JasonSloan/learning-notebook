@@ -269,7 +269,7 @@ if __name__ == "__main__":
 
 
 
-
+todo: [NVIDIA量化文档](https://on-demand.gputechconf.com/gtc/2017/presentation/s7310-8-bit-inference-with-tensorrt.pdf)
 
 
 
