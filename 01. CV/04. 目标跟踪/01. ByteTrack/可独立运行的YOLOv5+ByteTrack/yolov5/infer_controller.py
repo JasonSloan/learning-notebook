@@ -41,7 +41,7 @@ class InferenceController:
     def preprocess(self, img):
         img = self.letterbox(img)  # padded resize
         img = img / 255.
-        img = img.transpose((2, 0, 1))[::-1][None]  # HWC to CHW, BGR to RGB
+        img = img[..., ::-1].transpose((2, 0, 1))[None]  # (opencv format image)BGR to RGB, HWC to CHW, add batch dim 
         img = np.ascontiguousarray(img)  # contiguous
         return torch.from_numpy(img)
     
