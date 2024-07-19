@@ -32,7 +32,7 @@ class InputEmbeddings(nn.Module):
 
 ![](assets/positional_embedding.jpg)
 
-主要作用就是为每个位置的单词赋予一个位置编码信息，编码信息分为在sentence_sequence维度上的信息和在embedding维度上的信息。在sentence_sequence维度上的信息使用pos赋予，在embedding维度上的信息使用i赋予。
+主要作用就是为每个位置的单词赋予一个位置编码信息，编码信息分为在sentence_sequence维度上的信息和在embedding维度上的信息。在sentence_sequence维度上的信息使用pos赋予，在embedding维度上的信息使用i赋予。[原理详细解释](https://zhuanlan.zhihu.com/p/454482273)
 
 ```python
 # Creating the Positional Encoding
