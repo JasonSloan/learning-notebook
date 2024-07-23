@@ -1,6 +1,7 @@
-## 一. 对称量化与非对称量化
+# 一. 量化基础
+##  1. 对称量化与非对称量化
 
-## 1. 偏移方式的非对称量化
+### (1) 偏移方式的非对称量化
 
 公式推导:
 
@@ -33,7 +34,7 @@ q = np.round(x / scale + z)
 x_ = (q - z) * scale
 ```
 
-## 2. 绝对值方式的对称量化
+### (2) 绝对值方式的对称量化
 
 问题引入:
 
@@ -69,7 +70,7 @@ x_ = q * scale
 
 ![](assets/3.jpg)
 
-## 二. 动态范围计算方式
+## 2. 动态范围计算方式
 
 问题引入:
 
@@ -77,7 +78,7 @@ x_ = q * scale
 
 ![](assets/4.jpg)
 
-### 1. 通过直方图统计的方式确定数据的范围
+### (1) 通过直方图统计的方式确定数据的范围
 
 思路: 将数据划分到直方图中一个一个bin中, 然后找到那个包含绝大多数数据的最小值域范围
 
@@ -115,7 +116,7 @@ if __name__ == "__main__":
     scale, z = histo(x, 100, 0.8)
 ```
 
-### 3. 通过entropy的方式确定数据的范围
+### (2) 通过entropy的方式确定数据的范围
 
 我们知道, 衡量两组数据分布差异性可以通过计算两组数据的KL散度;
 
@@ -124,6 +125,10 @@ if __name__ == "__main__":
 注: KL散度计算方式: 将两组数据划分到数量相等的bins中, 然后将每个bin的数据数量除以整组数据的总量得到每个bin的概率, 然后通过以下公式计算这两组数据的KL散度即可
 
  $$ D_{KL} = \sum_i P(x_i) \log(\frac{P(x_i)}{Q(x_i)})$$
+
+**流程: **
+
+**将FP32的模型权重值量化---->将FP32的模型权重值和量化后的Int8模型权重值分别划分到同样个数的bins中---->计算每个bins的概率---->计算量化两种数据分布的KL散度**
 
 一个示例:
 
@@ -183,6 +188,10 @@ if __name__ == "__main__":
 
 这样只要计算原8个bins的数组[2, 2, 1, 0, 4, 1, 0, 1]与反映射回8个bins的数组[2, 2, 1, 0, 2.5, 2.5, 0, 1]的KL散度即可
 
+**流程: **
+
+**将FP32的模型权重值划分到n1(较大)个bins中---->将划分到n1个bins中的频数再划分到n2(256)个bins中---->将n2个bins中的频数反映射回n1个bins中(为0的位置还为0, 不为0的位置使用平均值填充)---->计算反映射回n1个bins中的数据的概率分布与原被划分到n1个bins中的概率分布之间的KL散度**
+
 ```python
 import numpy as np
 
@@ -220,6 +229,10 @@ if __name__ == "__main__":
  $$ D_{KL} = \sum_i P(x_i) \log(\frac{P(x_i)}{Q(x_i)})$$
 
 一个常规的解决思路就是在分母上加一个极小值epsilon, 但是这样会带来一个新的问题, 因为  $${Q(x_i)}$$ 代表的是某个bins的概率值, 如果为它加上一个epsilon, 那么 $$\sum_i Q(x_i)$$ 之和将不等于1, 而是等于  $$\sum_i (Q(x_i) + eps) = \sum_i (Q(x_i) )+ \sum_i(eps) = 1 + \sum_i(eps)$$  , 因此解决办法就是将概率为0的位置加一个epsilon, 同时将这个epsilon平均分到每个概率不为0的bins上扣除; 对于 $$P(x_i)$$ 也同理
+
+**流程: **
+
+**将FP32的模型权重值划分到n1(较大)个bins中---->将划分到n1个bins中的频数再划分到n2(256)个bins中---->将n2个bins中的频数反映射回n1个bins中(为0的位置还为0, 不为0的位置使用平均值填充)---->计算反映射回n1个bins中的数据的概率与原被划分到n1个bins中的概率---->将反映射回n1个bins中的数据的概率与原被划分到n1个bins中的概率进行平滑(使每一个位置的概率值都不为0)---->计算平滑后的两个数据分布之间的KL散度**
 
 ```python
 import numpy as np
@@ -267,11 +280,137 @@ if __name__ == "__main__":
     print(kl_value)
 ```
 
+上面这种计算方式还有一个问题就是, 要求FP32的模型权重文件划分到的bins数需要可以被256(tensorrt中是128)整除
+
+[NVIDIA量化文档](https://on-demand.gputechconf.com/gtc/2017/presentation/s7310-8-bit-inference-with-tensorrt.pdf)
+
+**TensorRT中量化的最终流程:**
+
+**将FP32的模型权重值划分到2048个bins中---->对这2048个bins从第128遍历到第2048, 这样每次遍历截取到前128、129、130、131......2048个bins---->将每次遍历截取到的前n个bins划分到128个bins中(如果不能整除, 将最后的几个全部加到末尾, 比如将129个bins划分到128个bins中, 就将第128和第129个bin中的频数全部划分到第128个bin中)---->将被划分成的128个bins反映射回n个bins(为0的位置还为0, 不为0的位置使用平均值填充)---->计算反映射回n个bins中的数据的概率与原被划分到n个bins中的概率---->将反映射回n个bins中的数据的概率与原被划分到n个bins中的概率进行平滑(使每一个位置的概率值都不为0)---->计算平滑后的两个数据分布之间的KL散度**
+
+```python
+import random
+import numpy as np
+import matplotlib.pyplot as plt 
 
 
-todo: [NVIDIA量化文档](https://on-demand.gputechconf.com/gtc/2017/presentation/s7310-8-bit-inference-with-tensorrt.pdf)
+def generator_P(size):
+    walk = []
+    avg = random.uniform(3.000, 600.999)
+    std = random.uniform(500.000, 1024.959)
+    for _ in range(size):
+        walk.append(random.gauss(avg, std)) 
+    return walk
 
+def smooth_distribution(p, eps=0.0001):
+    is_zeros = (p == 0).astype(np.float32)
+    is_nonzeros = (p != 0).astype(np.float32)
+    n_zeros = is_zeros.sum()
+    n_nonzeros = p.size - n_zeros
+    if not n_nonzeros:
+        raise ValueError('The discrete probability distribution is malformed. All entries are 0.')
+    eps1 = eps * float(n_zeros) / float(n_nonzeros)
+    assert eps1 < 1.0, 'n_zeros=%d, n_nonzeros=%d, eps1=%f' % (n_zeros, n_nonzeros, eps1)
+    hist = p.astype(np.float32)
+    hist += eps * is_zeros + (-eps1) * is_nonzeros
+    assert (hist <= 0).sum() == 0
+    return hist
+ 
+import copy
+import scipy.stats as stats
+def threshold_distribution(distribution, target_bin=128):
+    distribution = distribution[1:]
+    length = distribution.size
+    threshold_sum = sum(distribution[target_bin:])
+    kl_divergence = np.zeros(length - target_bin)
+    
+    for threshold in range(target_bin, length):
+        sliced_nd_hist = copy.deepcopy(distribution[:threshold])
 
+        # generate reference distribution p
+        p = sliced_nd_hist.copy()
+        p[threshold - 1] += threshold_sum
+        threshold_sum = threshold_sum - distribution[threshold]
+
+        # is_nonzeros[k] indicates whether hist[k] is nonzero
+        is_nonzeros = (p != 0).astype(np.int64)
+        
+        quantized_bins = np.zeros(target_bin, dtype=np.int64)
+        # calculate how many bins should be merged to generate 
+        # quantized distribution q
+        num_merged_bins = sliced_nd_hist.size // target_bin
+
+        # merge hist into num_quantized_bins bins
+        for j in range(target_bin):
+            start = j * num_merged_bins
+            stop = start + num_merged_bins
+            quantized_bins[j] = sliced_nd_hist[start:stop].sum()
+        quantized_bins[-1] += sliced_nd_hist[target_bin * num_merged_bins:].sum()
+
+        # expand quantized_bins into p.size bins
+        q = np.zeros(sliced_nd_hist.size, dtype=np.float64)
+        for j in range(target_bin):
+            start = j * num_merged_bins
+            if j == target_bin - 1:
+                stop = -1
+            else:
+                stop = start + num_merged_bins
+            norm = is_nonzeros[start:stop].sum()
+            if norm != 0:
+                q[start:stop] = float(quantized_bins[j]) / float(norm)
+        
+        p = smooth_distribution(p)
+        q = smooth_distribution(q)
+
+        # calculate kl_divergence between q and p
+        kl_divergence[threshold - target_bin] = stats.entropy(p, q)
+
+    min_kl_divergence = np.argmin(kl_divergence)
+    threshold_value = min_kl_divergence + target_bin
+
+    return threshold_value
+
+if __name__ == '__main__':
+ 
+    size = 20480
+    P = generator_P(size)
+    P = np.array(P)
+    P = P[P>0]
+    print("最大的激活值", max(np.absolute(P)))
+
+    hist, bins = np.histogram(P, bins =2048)  
+    threshold = threshold_distribution(hist, target_bin=128)
+    print("threshold 所在组:", threshold)
+    print("threshold 所在组的区间范围:", bins[threshold])
+    # 分成split_zie组, density表示是否要normed
+    plt.title("Relu activation value Histogram")
+    plt.xlabel("Activation values")
+    plt.ylabel("Normalized number of Counts")
+    plt.hist(P, bins=2047)
+    plt.vlines(bins[threshold], 0, 30, colors = "r", linestyles = "dashed")
+    plt.savefig("nvidia-entropy.jpg")
+    # plt.show()
+```
+
+# 二. PTQ和QAT
+
+## 1. PTQ
+
+**流程:**
+
+**选定校准数据集(一般应为几百张图, 可以很好的代表生产中的数据分布, tensorrt会使用这些校准数据集送入模型中, 得到模型每一层的输出)---->对于已训练好的模型, 进行每一层的参数统计(包括模型参数值以及模型输出值)---->计算量化后的参数---->量化模型**
+
+疑问: 量化的时候不是应该只量化模型参数吗? 这些参数训练后不就是一些固定值了吗? 为什么PTQ中要制定量化校准数据集, 将这些数据集送入模型中得到每一层的输出的意义是什么?
+
+## 2. QAT
+
+主要思想就是: 将量化和反量化过程插入到模型的计算图中, 将每一种运算都先量化再反量化, 这样在模型训练过程中, 模型会学习并适应量化误差
+
+**流程:**
+
+**预训练模型---->插入QDQ节点---->微调---->保存量化参数---->量化模型**
+
+![](assets/7.jpg)
 
 
 
