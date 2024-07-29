@@ -400,7 +400,9 @@ if __name__ == '__main__':
 
 **选定校准数据集(一般应为几百张图, 可以很好的代表生产中的数据分布, tensorrt会使用这些校准数据集送入模型中, 得到模型每一层的输出)---->对于已训练好的模型, 进行每一层的参数统计(包括模型参数值以及模型输出值)---->计算量化后的参数---->量化模型**
 
-疑问: 量化的时候不是应该只量化模型参数吗? 这些参数训练后不就是一些固定值了吗? 为什么PTQ中要制定量化校准数据集, 将这些数据集送入模型中得到每一层的输出的意义是什么?
+**Question:** 量化的时候不是应该只量化模型参数吗? 这些参数训练后不就是一些固定值了吗? 为什么PTQ中要制定量化校准数据集, 将这些数据集送入模型中得到每一层的输出的意义是什么?
+
+**Answer:**  输入，参数和输出都需要量化。量化为INT8是为了加快运算，input和weight类型类型需要一致，也就是说不但需要有模型参数的量化校准表也需要有输入输出的量化校准表, 那么输入输出的量化校准表就需要由一些量化校准数据集来计算
 
 ## 2. QAT
 
@@ -412,9 +414,200 @@ if __name__ == '__main__':
 
 ![](assets/7.jpg)
 
+### 3. 通过pytorch_quantization库实现自动插入QDQ节点
+
+[参考链接](https://github.com/NVIDIA/TensorRT/tree/release/10.2/tools/pytorch-quantization)
+
+```python
+# 安装:
+# 方式一: pip install pytorch-quantization --extra-index-url https://pypi.ngc.nvidia.com
+# 方式二: git clone https://github.com/NVIDIA/TensorRT.git
+#        cd tools/pytorch-quantization
+#        python setup.py install
+# 无论使用哪种方式都是需要自己安装cuda的, 不能使用trtpy安装cuda环境
+```
+
+使用pytorch_quantization对resnet18自动插入QDQ节点
+
+```python
+import warnings
+warnings.filterwarnings("ignore")
+
+import torch
+import torchvision
+from pytorch_quantization import tensor_quant
+from pytorch_quantization import quant_modules
+from pytorch_quantization import nn as quant_nn
+
+
+quant_modules.initialize()
+model = torchvision.models.resnet18()
+inputs = torch.randn(1, 3, 224, 224, dtype=torch.float32)
+quant_nn.TensorQuantizer.use_fb_fake_quant = True
+torch.onnx.export(
+    model,
+    inputs,
+    'resnet18-quant.onnx',
+    opset_version=13
+)
+```
+
+注意: 
+
+pytorch_quantization默认对同一层的输入是整体量化(也就是一层内的输入共用一个scale)
+
+但是对一层内的权重是分通道量化的, 输出通道有几个就有几个scale
+
+![](assets/8.jpg)
 
 
 
+### 4. 通过pytorch_quantization库实现手动插入QDQ节点: 方式一 
+
+先使用pytorch_quantization将模型全部插入QDQ节点, 然后将某些不需要插入QDQ节点的位置disable掉
+
+```python
+import warnings
+warnings.filterwarnings("ignore")
+
+import torch
+import torchvision
+from pytorch_quantization import tensor_quant
+from pytorch_quantization import quant_modules
+from pytorch_quantization import nn as quant_nn
+from pytorch_quantization.nn.modules import _utils as  quant_nn_utils
+from pytorch_quantization import calib
+from typing import List, Callable, Union, Dict
+
+
+class disable_quantization:
+    def __init__(self, model):
+        self.model  = model
+
+    def apply(self, disabled=True):
+        for name, module in self.model.named_modules():
+            if isinstance(module, quant_nn.TensorQuantizer):
+                module._disabled = disabled
+
+
+class enable_quantization:
+    def __init__(self, model):
+        self.model  = model
+
+    def apply(self, enabled=True):
+        for name, module in self.model.named_modules():
+            if isinstance(module, quant_nn.TensorQuantizer):
+                module._disabled = not enabled
+
+
+def quantizer_state(module):
+    for name, module in module.named_modules():
+        if isinstance(module, quant_nn.TensorQuantizer):
+            print(name, module)
+
+
+if __name__ == "__main__":
+    quant_modules.initialize()                  # 调用该接口, 模型的所有层都会自动插入QDQ节点
+    model = torchvision.models.resnet18()
+    disable_quantization(model.conv1).apply()   # 指定某一层不插入QDQ节点, model.conv1会比原模型多一个Identity节点
+    # enable_quantization(model.conv1).apply()    # 指定某层插入QDQ节点
+    # quantizer_state(model)                    # 打印所有已插入QDQ节点的层信息
+    inputs = torch.randn(1, 3, 224, 224)
+    quant_nn.TensorQuantizer.use_fb_fake_quant =True
+    torch.onnx.export(
+        model, 
+        inputs, 
+        'resnet18_quant_disable_conv1.onnx',
+        opset_version=13
+    )
+```
+
+### 4. 通过pytorch_quantization库实现手动插入QDQ节点: 方式二 
+
+直接对原模型指定哪些层插入QDQ节点
+
+```python
+import warnings
+warnings.filterwarnings("ignore")
+
+import torch
+import torchvision
+from pytorch_quantization import tensor_quant
+from pytorch_quantization import quant_modules
+from pytorch_quantization import nn as quant_nn
+from pytorch_quantization.nn.modules import _utils as  quant_nn_utils
+from pytorch_quantization import calib
+from typing import List, Callable, Union, Dict
+
+
+def quantizer_state(module):
+    for name, module in module.named_modules():
+        if isinstance(module, quant_nn.TensorQuantizer):
+            print(name, module)
+
+
+def transfer_torch_to_quantization(nninstance : torch.nn.Module, quantmodule):
+
+    quant_instance = quantmodule.__new__(quantmodule)       # new出来一个新的quantmodule
+    for k, val in vars(nninstance).items():                 # 将原torch.nn.Module的实例的属性的key, value赋值给新的quantmodule实例
+        setattr(quant_instance, k, val)
+
+    def __init__(self):
+      
+        if isinstance(self, quant_nn_utils.QuantInputMixin):    # 如果只是输入量化(比如BatchNorm2d层等, 没有权重参数)
+            self._input_quantizer.enabled = True
+            quant_desc_input = quant_nn_utils.pop_quant_desc_in_kwargs(self.__class__,input_only=True)
+            self.init_quantizer(quant_desc_input)
+
+            # Turn on torch_hist to enable higher calibration speeds
+            if isinstance(self._input_quantizer._calibrator, calib.HistogramCalibrator):
+                self._input_quantizer._calibrator._torch_hist = True
+        else:                                                   # 如果是权重和输入都量化(比如Conv2d等, 需要将权重和输入都量化)
+            quant_desc_input, quant_desc_weight = quant_nn_utils.pop_quant_desc_in_kwargs(self.__class__)
+            self.init_quantizer(quant_desc_input, quant_desc_weight)
+
+            # Turn on torch_hist to enable higher calibration speeds
+            if isinstance(self._input_quantizer._calibrator, calib.HistogramCalibrator):
+                self._input_quantizer._calibrator._torch_hist = True
+                self._weight_quantizer._calibrator._torch_hist = True
+
+    __init__(quant_instance)
+    return quant_instance
+
+
+def replace_to_quantization_module(model : torch.nn.Module, ignore_policy : Union[str, List[str], Callable] = None):
+
+    module_dict = {}        # module_dict存储的是: id(nn.Module) -> quant_nn.module
+    for entry in quant_modules._DEFAULT_QUANT_MAP:
+        module = getattr(entry.orig_mod, entry.mod_name)
+        module_dict[id(module)] = entry.replace_mod
+
+    def recursive_and_replace_module(module, prefix=""):
+        for name in module._modules:
+            submodule = module._modules[name]
+            path      = name if prefix == "" else prefix + "." + name
+            recursive_and_replace_module(submodule, path)       # 直接找到最naive的module(也就是没有子module的module)
+
+            submodule_id = id(type(submodule))
+            if submodule_id in module_dict:  
+                module._modules[name] = transfer_torch_to_quantization(submodule, module_dict[submodule_id])    # 
+
+    recursive_and_replace_module(model)
+
+
+if __name__ == "__main__":
+    model = torchvision.models.resnet18()
+    # quantizer_state(model)
+    replace_to_quantization_module(model)       # todo: 这里还有点问题, 直接指定子module(比如只量化resnet18的conv1)并不会只替换子module
+    inputs = torch.randn(1, 3, 224, 224)
+    quant_nn.TensorQuantizer.use_fb_fake_quant =True
+    torch.onnx.export(
+        model, 
+        inputs, 
+        'resnet18_quant_enable_conv1.onnx',
+        opset_version=13
+    )
+```
 
 
 
