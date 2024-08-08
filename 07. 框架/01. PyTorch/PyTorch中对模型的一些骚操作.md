@@ -1,4 +1,4 @@
-# 1. 使用setattr将模型中的指定模块替换为其他模块
+## 1. 使用setattr将模型中的指定模块替换为其他模块
 
 ```python
 import torch
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     print(model)
 ```
 
-# 2. 遍历module._modules将模型中的指定模块替换为其他模块
+## 2. 遍历module._modules将模型中的指定模块替换为其他模块
 
 ```python
 import torch.nn as nn
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     print(model)
 ```
 
-# 3. 如果有这么个需求，有一个类，他的成员方法中使用到了类的成员属性，在不改变原代码的情况下，如何替换掉这个方法？
+## 3. 如果有这么个需求，有一个类，他的成员方法中使用到了类的成员属性，在不改变原代码的情况下，如何替换掉这个方法？
 
 如下：
 
@@ -121,5 +121,49 @@ if __name__ == "__main__":
     # 所以不改变任何原代码的情况下，需要使用trainer.__setattr__方法来设置trainer实例的属性
     trainer.__setattr__("train", train_v2.__get__(trainer))
     trainer.train()
+```
+## 4. 使用register_forward_hook可视化一个网络中的每一层的输出 
+
+```python
+import torch
+import torch.nn as nn
+
+
+class Conv(nn.Module):
+    def __init__(self, in_channels, out_channels, k=3, s=1, p=1) -> None:
+        super().__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, k, s, p)
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.act = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))
+
+
+class Model(nn.Module):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.conv1 = Conv(3, 32)
+        self.conv2 = Conv(32, 32)
+        self.conv3 = Conv(32, 64)
+
+    def forward(self, x):
+        return self.conv3(self.conv2(self.conv1(x)))
+
+
+def make_layer_forward_hook():
+    def forward_hook(m, input, output):
+        # visualize code 
+        print(f'Module {m.__class__.__name__} output shape: {output.shape}')
+    return forward_hook
+
+
+if __name__ == "__main__":
+    model = Model()
+    for _, module in model.named_modules():
+        if isinstance(module, Conv):
+            module.register_forward_hook(make_layer_forward_hook())
+    dummy = torch.randn(1, 3, 640, 640)
+    model(dummy)
 ```
 
