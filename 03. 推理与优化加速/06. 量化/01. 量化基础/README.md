@@ -623,7 +623,15 @@ if __name__ == "__main__":
 
 
 
-**Question:**  
+**Question:**  如果在网络结构中某些层是使用Int8进行计算的, 有些层是使用FP16计算的, 那么在使用trtexec做模型转换时应该怎么指定?
+
+**Answer:**  这种情况应该加--int8 --fp16两个编译选项, 例如: 
+
+```bash
+trtexec --onnx=weights/yolov7-ptq.onnx --saveEngine=weights/yolov7-ptq.engine --int8 --fp16
+```
+
+
 
 
 
