@@ -57,7 +57,9 @@ dummy index在箭头左侧是可以重复出现的，但是free index在左侧�
     >>> torch.einsum('ijkl, ijtl->iktl',a,b)		# 虽然a矩阵和b矩阵在1和2维度上是相等的，但是因为是要在这两个维度上做矩阵乘法，所以在两个表达式中也必须写为不同的符号，即jk和jt，不允许都写成jk
 ```
 
+## 二. 多维高斯分布
 
+[参考链接](https://blog.csdn.net/weixin_38468077/article/details/103508072?ops_request_misc=&request_id=&biz_id=102&utm_term=2d%E9%AB%98%E6%96%AF&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-2-103508072.142^v100^pc_search_result_base4&spm=1018.2226.3001.4187)
 
 
 
