@@ -14,7 +14,8 @@ Note: [多维高斯分布的表示方法参考链接](https://blog.csdn.net/weix
 
 将一个xywh的HBB建模为一个均值为 $$\mu$$ 方差为 $$\sum$$ 的GBB, 如何通过xywh求 $$\mu$$ 和 $$\sum$$ 的方法:
 
- $$\mu = \frac{1}{N} \int_{x \in \Omega} x$$ ,                  $$\sum =\frac{1}{N}\int_{x\in\Omega} (x-\mu)^T(x-\mu)$$ 
+ $$\mu = \frac{1}{N} \int_{x \in \Omega} x$$ 
+ $$\sum =\frac{1}{N}\int_{x\in\Omega} (x-\mu)^T(x-\mu)$$ 
 
 其中 $$\Omega$$ 代表HBB的区域, x是属于 $$\Omega$$ 内的任意一点, N代表共有多少个点
 
