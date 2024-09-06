@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux", // 不用变
+            "includePath": [
+                "/root/yolov8-obb/opencv-build/include/opencv4",  
+                "/dl/sdk/include",
+                "/root/yolov8-obb/utils",
+                "/root/yolov8-obb/include"
+            ],
+            "defines": [], // 不用变
+            "compilerPath": "/usr/bin/gcc", // 不用变
+            "cStandard": "gnu11", // 不用变
+            "cppStandard": "gnu++11", // 不用变
+            "intelliSenseMode": "linux-gcc-x64", // 不用变
+            "configurationProvider": "ms-vscode.cmake-tools" // 不用变
+        }
+    ],
+    "version": 4 // 不用变
+}
