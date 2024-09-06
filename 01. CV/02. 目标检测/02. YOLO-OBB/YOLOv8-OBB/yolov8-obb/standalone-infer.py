@@ -53,7 +53,7 @@ class InferController:
         keep[..., :4] = self.scale_boxes(keep[..., :4]).round()
         return keep
 
-    def non_max_suppression_roated(self, pred):
+    def non_max_suppression_roated(self, pred, maxwh=7680):
         nc = pred.shape[-1] - 5  # DOTA1 dataset has 15 classes
         pred = pred[0, ...]  # 只支持batch_size=1
         boxes = torch.cat([pred[..., :4], pred[:, -1:]], dim=1)
@@ -68,16 +68,18 @@ class InferController:
         scores = scores[sorted_idx][..., None]
         classes = classes[sorted_idx][..., None]
         boxes = boxes[sorted_idx]
+        offset = classes * maxwh
+        boxes_offset = torch.cat([boxes[:, :2]+offset, boxes[:, 2:]], dim=1)
         if boxes.shape[0] == 0:
             return torch.empty([0, 7])
-        ious = self.batch_probiou(boxes, boxes).triu_(
+        ious = self.batch_probiou(boxes_offset, boxes_offset).triu_(
             diagonal=1
         )  # 计算所有boxes与boxes之间的iou; triu_: 将主轴下方的元素置为0
         pick = torch.nonzero(ious.max(dim=0)[0] < self.iou_thre).squeeze_(-1)
         boxes = boxes[sorted_idx[pick]]
         scores = scores[sorted_idx[pick]]
         classes = classes[sorted_idx[pick]]
-        return torch.cat([boxes, scores, classes], dim=1)
+        return torch.cat([boxes, scores, classes], dim=1)   # xywhr+score+class
 
     def batch_probiou(self, obb1, obb2, eps=1e-7):
         """
@@ -98,10 +100,10 @@ class InferController:
         x2, y2 = (
             x.squeeze(-1)[None] for x in obb2[..., :2].split(1, dim=-1)
         )  # x2,y2: [1, N]
-        a1, b1, c1 = self._get_covariance_matrix(obb1)  # a1, b1, c1: [N, 1]
+        a1, b1, c1 = self._get_covariance_matrix(obb1)  # a1, b1, c1: [N, 1], 对应于公式(1)
         a2, b2, c2 = (
             x.squeeze(-1)[None] for x in self._get_covariance_matrix(obb2)
-        )  # a2, b2, c2: [1, N]
+        )  # a2, b2, c2: [1, N], 对应于公式(1)
 
         t1 = (
             ((a1 + a2) * (y1 - y2).pow(2) + (b1 + b2) * (x1 - x2).pow(2))
@@ -217,7 +219,7 @@ if __name__ == "__main__":
     conf_thre = 0.25
     iou_thre = 0.45
     image = cv2.imread(image_path)
-    img_size = (1024, 1024)
+    img_size = (640, 640)
     infercontroller = InferController(
         img_size=img_size, weights=weights, conf_thre=conf_thre, iou_thre=iou_thre
     )

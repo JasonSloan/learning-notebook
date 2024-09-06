@@ -8,7 +8,7 @@
 #     └── dota1.5  ← downloads here (2GB)
 
 # Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
-path: /root/work/mnt/datasets/object-detection-datasets/DOTAv1.5 # dataset root dir
+path: ../datasets/DOTAv1.5 # dataset root dir
 train: images/train # train images (relative to 'path') 1411 images
 val: images/val # val images (relative to 'path') 458 images
 test: images/test # test images (optional) 937 images
@@ -33,4 +33,4 @@ names:
   15: container crane
 
 # Download script/URL (optional)
-download: https://github.com/ultralytics/yolov5/releases/download/v1.0/DOTAv1.5.zip
+download: https://github.com/ultralytics/assets/releases/download/v0.0.0/DOTAv1.5.zip
