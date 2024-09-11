@@ -2,9 +2,46 @@
 
 **Python版推理代码见本文件夹下, C++版推理代码见'03. 推理与优化加速\05. DLNN'**
 
+## 一. 旋转框的表示方法
 
+给定一些polygans的点, 计算旋转框需使用opencv的minAreaRect方法, 得到的返回值为cx, cy, w, h, theta, 其中cx, cy为旋转框的中心点坐标, w、h、theta存在以下两种情况, 且theta的取值范围为[0, pi/2)(**注意opencv版本>4.5时theta的取值范围为[0, pi/2), opencv版本<4.5时theta取值范围为[-pi/2, 0))**
 
-## 一. 旋转框之间的IoU计算方法
+![](assets/7.jpg)
+
+也就是说theta永远是x轴与w之间的夹角。当旋转框为情况0时, w为长边, 当旋转框为情况1时, w为短边
+
+YOLOv8训练数据的标注值是xyxyxyxy, 在代码内部就是通过以上方法将xyxyxyxy转换为xywhr的
+
+```python
+# 生成上面的图的代码
+import cv2
+import numpy as np
+from collections import namedtuple
+
+if __name__ == '__main__':
+    Polygans = namedtuple('Rect', ['x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4'])
+    p0 = Polygans(x1=587, y1=110, x2=735, y2=79, x3=848, y3=412, x4=715, y4=452)
+    p1 = Polygans(x1=241, y1=241, x2=371, y2=249, x3=352, y3=432, x4=219, y4=422)
+
+    polygans = [p0, p1]
+    img = np.full([2000, 2000, 3], 255, dtype=np.uint8)
+    for i, polygan in enumerate(polygans):
+        points = np.array([[polygan.x1, polygan.y1], [polygan.x2, polygan.y2], [polygan.x3, polygan.y3], [polygan.x4, polygan.y4]], dtype=np.float32)
+        rect = cv2.minAreaRect(points)
+        (cx, cy), (w, h), angle = rect
+        box_points = cv2.boxPoints(rect).astype(np.int32)
+        cv2.drawContours(img, [box_points], 0, (0, 0, 0), 2)
+        cv2.putText(img, f'{i}', (int(cx), int(cy)), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), thickness=2)
+        print(f'rect{i}: h={h}, w={w}, theta={angle}')
+    
+    while True:
+        cv2.imshow('Rects', img)
+        key = cv2.waitKey(0)
+        if key:
+            break
+```
+
+## 二. 旋转框之间的IoU计算方法
 
 [原论文](https://arxiv.org/pdf/2106.06072v1.pdf)
 
