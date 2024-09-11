@@ -1,3 +1,5 @@
+[medium讲解](https://medium.com/analytics-vidhya/distance-estimation-cf2f2fd709d8)
+
 ### 1. 相机模型
 
 实际真实相机模型, 相机为透镜, 具有聚焦的功能, 也就是会把被摄物体的点发射的所有光线, 聚焦到成像平面的一个点上:
