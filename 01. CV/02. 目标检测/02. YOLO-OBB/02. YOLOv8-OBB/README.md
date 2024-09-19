@@ -41,6 +41,24 @@ if __name__ == '__main__':
             break
 ```
 
+**注意, 在YOLOv8-OBB这里存在几点训练与推理不一致的地方(谜之操作, 没弄明白), 记录一下:**
+
+[提问作者给出的解答, 打开网页后搜JasonSloan即可定位到问题](https://docs.ultralytics.com/datasets/obb/#can-i-use-my-own-dataset-with-oriented-bounding-boxes-for-yolov8-training-and-if-so-how)
+
+1. 训练中的角度标注值采用的是opencv的minAreaRect方法, 因此取值范围为[0, pi/2)
+
+   ![](assets/9.jpg)
+
+2. 训练中的模型预测角度取值范围为[-pi/4, pi3/4]
+
+   ![](assets/10.jpg)
+
+3. 推理中的模型预测角度取值范围与训练中相同, 为[-pi/4, pi3/4]
+
+4. 推理中的将xywhr转换为xyxyxyxy之前, 会先将模型预测的[-pi/4, pi3/4)角度映射到[0, pi)的取值范围
+
+   ![](assets/11.jpg)
+
 ## 二. 旋转框之间的IoU计算方法
 
 [原论文](https://arxiv.org/pdf/2106.06072v1.pdf)
@@ -156,4 +174,26 @@ def _get_covariance_matrix(boxes):
     sin2 = sin.pow(2)
     return a * cos2 + b * sin2, a * sin2 + b * cos2, (a - b) * cos * sin    # 对应于公式(1)
 ```
+
+### 三. YOLOv8-OBB与YOLOv8之间的异同点
+
+1. 标注文件不同
+
+   YOLOv8中对真实框的标注文件中每一行为cls+xywh, 而YOLOv8-OBB中对真实框的标注文件中每一行为cls+xyxyxyxy
+
+2. 模型结构中的head不同
+
+   YOLOv8的head为Detect模块, 而YOLOv8-OBB的head为OBB模块。
+
+   OBB模块继承自Detect模块, 并多了三个分支, 对应于三张特征图的角度计算
+
+   ![](assets/8.jpg)
+
+3. 训练中的损失不同
+
+   YOLOv8的损失分为DFL、ClsLoss、BoxLoss这三种损失, YOLOv8-OBB的损失前两个和YOLOv8一致, 与角度无关; 最后一个BoxIoU损失从YOLOv8的CIoU替换成了上面提到的ProbIou
+
+4. 预测中的NMS不同
+
+   预测阶段的NMS中对框与框之间的IoU计算也采用的是ProbIou
 

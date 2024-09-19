@@ -61,6 +61,12 @@ pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=Python
 
 
 
+### 方式三:
+
+可视化的方式评估, [链接]((https://github.com/rafaelpadilla/review_object_detection_metrics))
+
+![](assets/1.jpg)
+
 
 
 
