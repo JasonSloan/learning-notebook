@@ -15,6 +15,37 @@ sudo service docker start
 
 # 二、例子
 
+## 0. 当前国内拉取镜像方法
+
+将/etc/docker/daemon.json文件内容替换为下面的
+
+```python
+{
+    "registry-mirrors": [
+        "https://hub.uuuadc.top",
+        "https://docker.anyhub.us.kg",
+        "https://dockerhub.jobcher.com",
+        "https://dockerhub.icu",
+        "https://docker.ckyl.me",
+        "https://docker.awsl9527.cn",
+        "https://docker.m.daocloud.io",
+        "https://docker.1panel.live",
+        "https://hub.rat.dev"
+    ],
+
+    "runtimes": {
+    "nvidia": {
+      "path": "nvidia-container-runtime",
+      "runtimeArgs": []
+      }
+    },
+    "default-runtime": "nvidia"
+
+}
+```
+
+
+
 ## 1. docker拉取python镜像到本地并运行，安装第三方库
 
 ```bash
