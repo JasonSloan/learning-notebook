@@ -35,6 +35,7 @@ git reset --mixed e2a3919    将head移动到哈希值为e2a3919的位置，保�
 git status  查看状态
 git log     查看日志
 git diff    查看工作区代码与之前commit的代码的不同
+git config --global credential.helper store 使用该命令存储git用户信息, 当成功push一次后, 以后就不用每次都需要重新输入用户名和密码了
 
 远程仓库中的一些解释：
 pull requests(pr)：一般会将代码推送到远程仓库的分支（pr)中，然后会有相关人员进行review审核，review通过会才会合并到主分支上。
