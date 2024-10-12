@@ -74,19 +74,10 @@ public:
                 unique_lock<mutex> l(lock_);
                 cv_.wait(l, [&](){return !running_ || !jobs_.empty();});        // 一直等着，cv_.wait(lock, predicate):如果 running不在运行状态 或者说 jobs_有东西 而且接收到了notify one的信号
                 if(!running_) break;                                            // 如果实例被析构了，那么就结束该线程
-                while(!jobs_.empty()){
-                    fetched_jobs.emplace_back(std::move(jobs_.front()));        // 往里面fetched_jobs里塞东西 , std::move将对象的所有权从a转移到b 
-                    jobs_.pop();                                                // 从jobs_任务队列中将当前要推理的job给pop出来 
-                }                                
-                l.unlock(); 
-				for(auto& job : fetched_jobs){                                  // 遍历要推理的job         
-                    auto start_time = std::chrono::high_resolution_clock::now();                            // [&]{inference(job); return;}  
-                    inference(job);                                             // 调用inference执行推理
-                    auto end_time = std::chrono::high_resolution_clock::now();
-                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-                    // printf("Total time consumed: %ld ms\n", duration.count());
-                }
-                fetched_jobs.clear();
+                Job job_one = std::move(jobs_.front());
+                jobs_.pop();                                                    // 从jobs_任务队列中将当前要推理的job给pop出来 
+                l.unlock();                                                     // 注意这里要解锁, 否则调用inference等inference执行完再解锁又变同步了
+                inference(job_one);                                             // 调用inference执行推理
             }
         }
     }
