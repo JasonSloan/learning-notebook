@@ -183,6 +183,7 @@ for i in range(iters):
     v_pi = r_pi + gamma * (p_pi @ v_pi)
     
 print(v_pi)
+>>> [7.9999933 9.999993  9.999993  9.999993 ]
 ```
 
 ![](assets/43.jpg)
