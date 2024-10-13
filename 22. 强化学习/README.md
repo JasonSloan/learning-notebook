@@ -48,7 +48,7 @@ Action space是和state有关的， 不同的state会有不同的Action space，
 
 ![](assets/9.jpg)
 
-在强化学习中，我们使用 $\pi$ 来表示策略。在从一个状态转移到另一个状态的时候，采取不同的动作的概率之和应为1。
+**在强化学习中，我们使用 $\pi$ 来表示策略。在从一个状态转移到另一个状态的时候，采取不同的动作的概率之和应为1。**
 
 ![](assets/10.jpg)
 
@@ -100,6 +100,8 @@ reward只依赖于当前状态和采取的动作，不取决于它下一刻处�
 
 在上面的公式中， r已知、$\gamma$ 已知、P已知，则v可求
 
+## 2. 公式推导
+
 ![](assets/26.jpg)
 
 ![](assets/27.jpg)
@@ -112,7 +114,7 @@ reward只依赖于当前状态和采取的动作，不取决于它下一刻处�
 
 ![](assets/31.jpg)
 
-**注意： 这里的$\pi(a|s)$指的是当前状态为是s，采取动作a的概率，这里的$\pi$不是前面所说的策略的意思**
+**注意： 这里的$\pi(a|s)$指的是当前状态为是s，采取动作a的概率**
 
 ![](assets/32.jpg)
 
@@ -123,3 +125,66 @@ reward只依赖于当前状态和采取的动作，不取决于它下一刻处�
 ![](assets/35.jpg)
 
 这里求解的步骤略过
+
+## 3. 公式的向量形式
+
+![](assets/36.jpg)
+
+![](assets/37.jpg)
+
+≜符号在数学上的含义为“等价于”
+
+![](assets/38.jpg)
+
+$p_{\pi}(s_j|s_i)$的含义为从状态$s_i$跳到状态$s_j$的概率，看下面的例子更清晰
+
+![](assets/39.jpg)
+
+![](assets/40.jpg)
+
+## （插入）Policy evaluation概念
+
+![](assets/41.jpg)
+
+![](assets/42.jpg)
+
+注意这里的$v_k$是向量，先假设一个$v_0$向量值，然后可以一直递归的求解$v_2 v_3 v_4$......，当k趋近于无穷大的时候，求得的序列$\{v_k\}$向量就等价于原始的$v_\pi$（证明略）
+
+自己写的例子：
+
+![](assets/44.jpg)
+
+对应的求解代码：
+
+```python
+import numpy as np
+
+gamma = 0.9
+iters = 100000
+
+v_pi = np.array(
+    [0, 0, 0, 0], dtype=np.float32
+)
+
+r_pi = np.array(
+    [-1, 1, 1, 1], dtype=np.float32
+)
+
+p_pi = np.array(
+    [
+        [0, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+    ], dtype=np.float32
+)
+
+for i in range(iters):
+    v_pi = r_pi + gamma * (p_pi @ v_pi)
+    
+print(v_pi)
+```
+
+![](assets/43.jpg)
+
+![](assets/45.jpg)
