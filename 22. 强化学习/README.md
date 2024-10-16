@@ -189,3 +189,60 @@ print(v_pi)
 ![](assets/43.jpg)
 
 ![](assets/45.jpg)
+
+## 4. action value
+
+![](assets/46.jpg)
+
+![](assets/47.jpg)
+
+![](assets/48.jpg)
+
+![](assets/49.jpg)
+
+![](assets/50.jpg)
+
+![](assets/51.jpg)
+
+#  三. 贝尔曼最优公式
+
+## 1. 引入
+
+![](assets/52.jpg)
+
+![](assets/53.jpg)
+
+![](assets/54.jpg)
+
+![](assets/55.jpg)
+
+$argmax_a$在数学上表示： 待求参数是a,  且要求是后面的表达式的值最大，返回值为a
+
+![](assets/56.jpg)
+
+## 2. 公式定义与推导
+
+![](assets/57.jpg)
+
+![](assets/58.jpg)
+
+![](assets/59.jpg)
+
+$\max_{\pi}$在数学上表示： 待求参数是$\pi$,  且要求是后面的表达式的值最大，返回值为后面的表达式的值
+
+![](assets/60.jpg)
+
+![](assets/61.jpg)
+
+![](assets/62.jpg)
+
+![](assets/63.jpg)
+
+
+
+
+
+
+
+
+
