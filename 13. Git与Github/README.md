@@ -1,4 +1,31 @@
-# 一. 一套完整的git流程
+# 一. 常用命令
+
+```bash
+#----------------git branch----------------
+git branch  查看自己所在本地分支
+git branch -r   查看远程分支
+git branch -a   列出本地分支和远程分支
+git branch -d mybranch   删除本地mybranch分支
+git push origin --delete mybranch  删除远程分支
+
+#----------------git reset----------------
+git reset --hard e2a3919    将head移动到哈希值为e2a3919的位置，删除e2a3919和原HEAD之间commit的文件（回退操作）
+git reset --soft e2a3919    将head移动到哈希值为e2a3919的位置，保留e2a3919和原HEAD之间commit的文件，将文件从本地仓库回到暂存区
+git reset --mixed e2a3919    将head移动到哈希值为e2a3919的位置，保留e2a3919和原HEAD之间commit的文件，将文件从本地仓库回到工作区
+
+#----------------git 其他----------------
+git status  查看状态
+git log     查看日志
+git config --global user.name "Your Name"	设置git信息
+git config --global user.email "your.email@example.com"	设置git信息
+git rm --cached ./**/*.jpg 删除已经提交的图片(比如上次误提交了, 然后git还在跟踪)
+git config --global credential.helper store 使用该命令存储git用户信息, 当成功push一次后, 以后就不用每次都需要重新输入用户名和密码了
+
+远程仓库中的一些解释：
+pull requests(pr)：一般会将代码推送到远程仓库的分支（pr)中，然后会有相关人员进行review审核，review通过会才会合并到主分支上。
+```
+
+# 二. 一套标准git流程
 
 ```python
 一套完整的提交代码流程：
@@ -19,29 +46,7 @@ git merge main    							# 将本地main分支的代码拉到mybranch中（此�
 git push --set-upstream origin mybranch 	# 推送已commit到本地仓库的代码到远程仓库中的mybranch分支（--set-upstream意思是：有可能本地分支有3个分支，而远程仓库只有2个分支，所以要现在远程仓库新建一个和本地仓库一样的分支后再push代码）
 ```
 
-# 二. 其他git常用命令
-
-```python
-git branch  查看自己所在本地分支
-git branch -r   查看远程分支
-git branch -a   列出本地分支和远程分支
-git branch -d mybranch   删除本地mybranch分支
-git push origin --delete mybranch  删除远程分支
-
-git reset --hard e2a3919    将head移动到哈希值为e2a3919的位置，删除e2a3919和原HEAD之间commit的文件（回退操作）
-git reset --soft e2a3919    将head移动到哈希值为e2a3919的位置，保留e2a3919和原HEAD之间commit的文件，将文件从本地仓库回到暂存区
-git reset --mixed e2a3919    将head移动到哈希值为e2a3919的位置，保留e2a3919和原HEAD之间commit的文件，将文件从本地仓库回到工作区
-
-git status  查看状态
-git log     查看日志
-git diff    查看工作区代码与之前commit的代码的不同
-git config --global credential.helper store 使用该命令存储git用户信息, 当成功push一次后, 以后就不用每次都需要重新输入用户名和密码了
-
-远程仓库中的一些解释：
-pull requests(pr)：一般会将代码推送到远程仓库的分支（pr)中，然后会有相关人员进行review审核，review通过会才会合并到主分支上。
-```
-
-# 三. 添加公钥
+# 三. 添加git公钥
 
 **windows系统中：**
 
