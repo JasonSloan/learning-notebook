@@ -316,6 +316,106 @@ $\max_{\pi}$在数学上表示： 待求参数是$\pi$,  且要求是后面的�
 
 ![](codes/assets/99.jpg)
 
+![](codes/assets/100.jpg)
+
+![](codes/assets/101.jpg)
+
+![](codes/assets/102.jpg)
+
+**代码实现见： "codes/policy-iteration-bellman.ipynb"**
+
+## 2.截断策略迭代算法求解贝尔曼最优公式策略
+
+![](codes/assets/103.jpg)
+
+![](codes/assets/104.jpg)
+
+![](codes/assets/105.jpg)
+
+![](codes/assets/106.jpg)
+
+![](codes/assets/107.jpg)
+
+# 五. 蒙特卡洛方法
+
+## 1. 引出
+
+![](codes/assets/108.jpg)
+
+![](codes/assets/109.jpg)
+
+![](codes/assets/110.jpg)
+
+![](codes/assets/111.jpg)
+
+![](codes/assets/112.jpg)
+
+## 2. MC Basic
+
+![](codes/assets/113.jpg)
+
+![](codes/assets/114.jpg)
+
+![](codes/assets/115.jpg)
+
+![](codes/assets/116.jpg)
+
+![](codes/assets/117.jpg)
+
+## 3. MC Basic example
+
+![](codes/assets/118.jpg)
+
+![](codes/assets/119.jpg)
+
+![](codes/assets/120.jpg)
+
+![](codes/assets/121.jpg)
+
+![](codes/assets/123.jpg)
+
+
+
+![](codes/assets/122.jpg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
