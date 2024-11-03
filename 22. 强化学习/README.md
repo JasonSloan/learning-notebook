@@ -352,6 +352,10 @@ $\max_{\pi}$在数学上表示： 待求参数是$\pi$,  且要求是后面的�
 
 ## 2. MC Basic
 
+**蒙特卡洛算法的核心思想：**
+
+我们求解policy的关键在于求解每个state处的action value，也就是$q_{{\pi}k}$，而求解$q_{{\pi}k}$的一种方式是根据state value和action value的转换公式（比如policy iteration算法），此种方式被称为model-base方法；而另一种方式就是直接根据定义，也就是在一个state处的$q_{{\pi}k}$，等于从这个state处出发可能产生的所有episode的return的期望，此种方式被称为model-free方法
+
 ![](codes/assets/113.jpg)
 
 ![](codes/assets/114.jpg)
@@ -374,9 +378,107 @@ $\max_{\pi}$在数学上表示： 待求参数是$\pi$,  且要求是后面的�
 
 ![](codes/assets/123.jpg)
 
-
-
 ![](codes/assets/122.jpg)
+
+![](codes/assets/124.jpg)
+
+![](codes/assets/125.jpg)
+
+![](codes/assets/126.jpg)
+
+![](codes/assets/127.jpg)
+
+## 4. MC Exploring Starts
+
+![](codes/assets/128.jpg)
+
+![](codes/assets/129.jpg)
+
+![](codes/assets/130.jpg)
+
+![](codes/assets/131.jpg)
+
+![](codes/assets/132.jpg)
+
+**MC-Exploring-Starts缺点很明显，就是要确保所有的state和所有的action都要被探索到，因为没被探索到的action有可能就是最优的action，而全部被探索往往是无法确保的，要确保的话，就需要从每一个(state, action)对儿出发产生episode，这样就又退化成了MC-Basic**
+
+**解决上述问题的方案就是使用MC Epsilon-Greedy**
+
+## 5. MC Epsilon-Greedy 
+
+![](codes/assets/133.jpg)
+
+![](codes/assets/134.jpg)
+
+**greedy在这里的含义为**，当对某个state来说，如果最大的action value对应的action为a\*，那么当产生episode的时候，选择a\*的概率是最大的，但是也有一定比较小的概率选择其他的action，这样就保证了不会遗漏每一个action
+
+![](codes/assets/135.jpg)
+
+![](codes/assets/136.jpg)
+
+![](codes/assets/137.jpg)
+
+![](codes/assets/138.jpg)
+
+## 6. MC Epsilon-Greedy examples
+
+![](codes/assets/139.jpg)
+
+![](codes/assets/140.jpg)
+
+![](codes/assets/141.jpg)
+
+![](codes/assets/142.jpg)
+
+![](codes/assets/143.jpg)
+
+![](codes/assets/144.jpg)
+
+所以如果采用MC Epsilon算法时， 一般会先设置一个大的epsilon值进行探索，然后逐渐减小epsilon值直到0，以能获取最优策略
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
