@@ -436,7 +436,7 @@ $\max_{\pi}$在数学上表示： 待求参数是$\pi$,  且要求是后面的�
 
 所以如果采用MC Epsilon算法时， 一般会先设置一个大的epsilon值进行探索，然后逐渐减小epsilon值直到0，以能获取最优策略
 
-# 七. 随机近似理论与随机梯度下降
+# 六. 随机近似理论与随机梯度下降
 
 ## 1. 引出
 
@@ -466,11 +466,73 @@ $\max_{\pi}$在数学上表示： 待求参数是$\pi$,  且要求是后面的�
 
 ![](codes/assets/155.jpg)
 
+**代码实现见： "codes/Robbins-Monro.ipynb"**
+
 其实这个公式和SGD是一模一样的，在随机梯度下降时，上面的w为待求解参数，$a_k$为学习率，$g(w_k)$为目标函数的导数
 
 ![](codes/assets/156.jpg)
 
 ## 3. SGD
+
+![](codes/assets/157.jpg)
+
+![](codes/assets/158.jpg)
+
+![](codes/assets/159.jpg)
+
+![](codes/assets/160.jpg)
+
+上面这个例子实际上目的是求w*，也就是求X的期望，这种情况就等同于mean estimation算法，所以说mean estimation算法是SGD的一种特殊情况。
+
+![](codes/assets/161.jpg)
+
+由上述化简出的公式也可以看出，和mean estimation算法一模一样
+
+**SGD的性质：在距离最优点越远的时候，SGD的前进方向和GD越接近；在距离最优点越近的时候，SGD的前进方向和GD越不接近。因此SGD只会在收敛的时候会产生随机性，而在未收敛时，和GD一样，会有一个正确的前进方向。（证明课件略）**
+
+![](codes/assets/162.jpg)
+
+**代码实现见： "codes/SGD-MBGD-BGD.ipynb"**
+
+![](codes/assets/164.jpg)
+
+## 4. MBGD、BGD
+
+![](codes/assets/163.jpg)
+
+![](codes/assets/165.jpg)
+
+![](codes/assets/166.jpg)
+
+![](codes/assets/167.jpg)
+
+![](codes/assets/168.jpg)
+
+![](codes/assets/169.jpg)
+
+# 七. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
