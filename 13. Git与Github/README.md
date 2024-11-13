@@ -13,6 +13,13 @@ git reset --hard e2a3919    将head移动到哈希值为e2a3919的位置，删�
 git reset --soft e2a3919    将head移动到哈希值为e2a3919的位置，保留e2a3919和原HEAD之间commit的文件，将文件从本地仓库回到暂存区
 git reset --mixed e2a3919    将head移动到哈希值为e2a3919的位置，保留e2a3919和原HEAD之间commit的文件，将文件从本地仓库回到工作区
 
+#----------------git tag----------------
+git tag -a v1.0 -m "Release version 1.0"		   	tag当前代码
+git tag -a v1.0 676fafe -m "Release version 1.0"	tag某次提交
+git push origin v1.0								将本地tag推到远端
+git tag -d v1.0										删除本地tag
+git push origin --delete v1.0						删除远端tag
+
 #----------------git 其他----------------
 git status  查看状态
 git log     查看日志
