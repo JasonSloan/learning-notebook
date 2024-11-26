@@ -598,6 +598,30 @@ Off-policy含义为：先生成一个episode的经验，然后根据该经验改
 
 ![](codes/assets/198.jpg)
 
+![](codes/assets/199.jpg)
+
+![](codes/assets/200.jpg)
+
+注意off-policy版本的这里的$\pi_b$和$\pi_T$是两个不同的策略，$\pi_b$用来生成数据（产生episode），$\pi_T$是待优化的目标策略
+
+![](codes/assets/202.jpg)
+
+![](codes/assets/203.jpg)
+
+![](codes/assets/204.jpg)
+
+![](codes/assets/205.jpg)
+
+## 7. TD-learning系列算法总结
+
+![](codes/assets/206.jpg)
+
+![](codes/assets/207.jpg)
+
+
+
+
+
 
 
 
