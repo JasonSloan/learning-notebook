@@ -28,6 +28,14 @@ git config --global user.email "your.email@example.com"	设置git信息
 git rm --cached ./**/*.jpg 删除已经提交的图片(比如上次误提交了, 然后git还在跟踪)
 git config --global credential.helper store 使用该命令存储git用户信息, 当成功push一次后, 以后就不用每次都需要重新输入用户名和密码了
 
+#----------------将本地已有代码推到远程空仓库----------------
+cd existing-project
+git init
+git add --all
+git commit -m "Initial Commit"
+git remote add origin http://10.66.88.10:7990/scm/at/yolo-openvino.git
+git push -u origin master
+
 远程仓库中的一些解释：
 pull requests(pr)：一般会将代码推送到远程仓库的分支（pr)中，然后会有相关人员进行review审核，review通过会才会合并到主分支上。
 ```
