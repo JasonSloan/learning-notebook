@@ -2,12 +2,9 @@
 
 ![](assets/octotree.jpg)
 
+**本仓库原创部分较多，以下内容如有引用，请注明出处：**
 
-
-**本仓库较大, clone前建议先参考本仓库中的"Git与Github"中的"FastGithub软件"配置好后克隆下载, 使用FastGithub软件克隆时的下载速度:**
-
-![](assets/clone.jpg)
-
-
+1. RL强化学习各种算法代码实现
+2. YOLOv8剪枝
 
 **觉得本仓库好的, 给个Star吧!**
