@@ -618,6 +618,132 @@ Off-policy含义为：先生成一个episode的经验，然后根据该经验改
 
 ![](codes/assets/207.jpg)
 
+# 八. 值函数近似
+
+## 1. 引出
+
+![](codes/assets/208.jpg)
+
+![](codes/assets/209.jpg)
+
+![](codes/assets/210.jpg)
+
+这里的T代表转置的意思，一般，一个一维的向量默认为列向量
+
+![](codes/assets/211.jpg)
+
+![](codes/assets/212.jpg)
+
+![](codes/assets/213.jpg)
+
+## 2. 通过值函数近似估计state value
+
+![](codes/assets/214.jpg)
+
+![](codes/assets/215.jpg)
+
+如果是数据是均匀分布，那么这里的目标函数实际上就等同于深度学习里的MSE
+
+![](codes/assets/216.jpg)
+
+而实际上在强化学习中，数据分布是不均匀的（比如网格世界中某些state会被频繁访问，而有些几乎不会被访问），所以目标函数实际上应该是一个带权重的MSE
+
+![](codes/assets/217.jpg)
+
+![](codes/assets/218.jpg)
+
+![](codes/assets/219.jpg)
+
+![](codes/assets/220.jpg)
+
+![](codes/assets/221.jpg)
+
+![](codes/assets/222.jpg)
+
+![](codes/assets/223.jpg)
+
+![](codes/assets/224.jpg)
+
+![](codes/assets/225.jpg)
+
+![](codes/assets/226.jpg)
+
+![](codes/assets/227.jpg)
+
+## 3. 例子
+
+![](codes/assets/228.jpg)
+
+![](codes/assets/229.jpg)
+
+![](codes/assets/230.jpg)
+
+![](codes/assets/231.jpg)
+
+![](codes/assets/232.jpg)
+
+![](codes/assets/233.jpg)
+
+![](codes/assets/234.jpg)
+
+![](codes/assets/235.jpg)
+
+## 4. 值函数近似Sarsa
+
+![](codes/assets/236.jpg)
+
+![](codes/assets/237.jpg)
+
+![](codes/assets/238.jpg)
+
+## 5. 值函数近似Q-learning
+
+![](codes/assets/239.jpg)
+
+![](codes/assets/240.jpg)
+
+![](codes/assets/241.jpg)
+
+## 6. Deep Q-learning
+
+![](codes/assets/242.jpg)
+
+![](codes/assets/243.jpg)
+
+![](codes/assets/244.jpg)
+
+![](codes/assets/245.jpg)
+
+基本思想就是先初始化两个网络，参数相同，一个用来计算上图中的红色的action value，另一个用来计算上图中蓝色的action value；然后在训练过程中，先固定住红色网络的参数，更新蓝色网络参数，一定轮次后将蓝色网络的参数赋值给红色网络。如此循环往复
+
+![](codes/assets/246.jpg)
+
+![](codes/assets/247.jpg)
+
+![](codes/assets/248.jpg)
+
+![](codes/assets/249.jpg)
+
+![](codes/assets/250.jpg)
+
+![](codes/assets/251.jpg)
+
+## 7. Deep Q-learning例子
+
+![](codes/assets/253.jpg)
+
+![](codes/assets/254.jpg)
+
+![](codes/assets/255.jpg)
+
+![](codes/assets/256.jpg)
+
+![](codes/assets/257.jpg)
+
+从上图可以看出，在强化学习中，即使损失函数一直在下降，也不能代表所估计的策略是好的策略，因为在数据不充足的情况下，神经网络逼近的只是当前数据下的'最优'
+
+
+
 
 
 
