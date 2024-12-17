@@ -742,7 +742,83 @@ Off-policy含义为：先生成一个episode的经验，然后根据该经验改
 
 从上图可以看出，在强化学习中，即使损失函数一直在下降，也不能代表所估计的策略是好的策略，因为在数据不充足的情况下，神经网络逼近的只是当前数据下的'最优'
 
+# 九. 策略梯度方法
 
+## 1. 基本思路
+
+![](codes/assets/258.jpg)
+
+![](codes/assets/259.jpg)
+
+![](codes/assets/260.jpg)
+
+![](codes/assets/261.jpg)
+
+![](codes/assets/262.jpg)
+
+![](codes/assets/263.jpg)
+
+## 2. 目标函数
+
+![](codes/assets/264.jpg)
+
+![](codes/assets/265.jpg)
+
+![](codes/assets/266.jpg)
+
+![](codes/assets/267.jpg)
+
+![](codes/assets/268.jpg)
+
+![](codes/assets/269.jpg)
+
+![](codes/assets/270.jpg)
+
+![](codes/assets/271.jpg)
+
+![](codes/assets/272.jpg)
+
+![](codes/assets/273.jpg)
+
+![](codes/assets/274.jpg)
+
+![](codes/assets/275.jpg)
+
+## 3. 目标函数的梯度
+
+![](codes/assets/276.jpg)
+
+![](codes/assets/277.jpg)
+
+![](codes/assets/278.jpg)
+
+![](codes/assets/279.jpg)
+
+![](codes/assets/280.jpg)
+
+![](codes/assets/281.jpg)
+
+![](codes/assets/282.jpg)
+
+![](codes/assets/283.jpg)
+
+## 4. 梯度上升算法REINFORCE
+
+![](codes/assets/284.jpg)
+
+![](codes/assets/285.jpg)
+
+![](codes/assets/286.jpg)
+
+![](codes/assets/287.jpg)
+
+![](codes/assets/288.jpg)
+
+![](codes/assets/289.jpg)
+
+![](codes/assets/290.jpg)
+
+![](codes/assets/291.jpg)
 
 
 
