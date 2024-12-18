@@ -19,94 +19,94 @@ For easier navigation of this repository, consider using the Google [**Octotree*
 
 ### 📚 Repository Structure
 
-- [x] **[CV]**
+**[CV]**
 
-      - Comprehension of Data Labeling, OpenCV, Object Detection, ReID, Object Tracking, Super-Resolution, Camera Calibration, Large Vision Models, Feature Mapping, Stereo Vision.
+- Comprehension of Data Labeling, OpenCV, Object Detection, ReID, Object Tracking, Super-Resolution, Camera Calibration, Large Vision Models, Feature Mapping, Stereo Vision.
 
-      **[NLP]**
+**[NLP]**
 
-      - Usage introduction of `jieba` & `hanlp`, comprehension of Transformers.
+- Usage introduction of `jieba` & `hanlp`, comprehension of Transformers.
 
-      **[RL]**
+**[RL]**
 
-      - Classic Reinforcement Learning code reimplementation.
+- Classic Reinforcement Learning code reimplementation.
 
-      **[Inference Code with Model Optimization]**
+**[Inference Code with Model Optimization]**
 
-      - Inference code for different platforms, including NVIDIA, Intel, RK, DL, etc.
-      - Model pruning and quantization.
+- Inference code for different platforms, including NVIDIA, Intel, RK, DL, etc.
+- Model pruning and quantization.
 
-      **[Training Related]**
+**[Training Related]**
 
-      - Explanation of various training tricks.
+- Explanation of various training tricks.
 
-      **[Frameworks]**
+**[Frameworks]**
 
-      - Useful usage examples of PyTorch, NumPy, pandas, Matplotlib, TensorBoard, and PyTorch Quantization.
+- Useful usage examples of PyTorch, NumPy, pandas, Matplotlib, TensorBoard, and PyTorch Quantization.
 
-      **[Scripts]**
+**[Scripts]**
 
-      - A collection of useful scripts.
+- A collection of useful scripts.
 
-      **[Python]**
+**[Python]**
 
-      - Examples of multiprocessing, multi-threading, and other Python utilities.
+- Examples of multiprocessing, multi-threading, and other Python utilities.
 
-      **[C++]**
+**[C++]**
 
-      - Frequently used C++ code and C++ multi-threading tutorials.
+- Frequently used C++ code and C++ multi-threading tutorials.
 
-      **[Linux]**
+**[Linux]**
 
-      - Useful Linux operations and commands.
+- Useful Linux operations and commands.
 
-      **[Docker]**
+**[Docker]**
 
-      - Basic usage and examples of Docker.
+- Basic usage and examples of Docker.
 
-      **[FFmpeg]**
+**[FFmpeg]**
 
-      - Basic usage examples of FFmpeg.
+- Basic usage examples of FFmpeg.
 
-      **[Git]**
+**[Git]**
 
-      - Basic usage of Git and version control.
+- Basic usage of Git and version control.
 
-      **[IDE]**
+**[IDE]**
 
-      - Tips and tricks for using VSCode and PyCharm.
+- Tips and tricks for using VSCode and PyCharm.
 
-      **[Web Related]**
+**[Web Related]**
 
-      - Basic usage of Flask for web development.
+- Basic usage of Flask for web development.
 
-      **[Machine Learning]**
+**[Machine Learning]**
 
-      - Understanding the fundamentals of mathematics in machine learning.
+- Understanding the fundamentals of mathematics in machine learning.
 
-      **[Frp]**
+**[Frp]**
 
-      - Introduction to using `frp` (Fast Reverse Proxy).
+- Introduction to using `frp` (Fast Reverse Proxy).
 
-      **[Interview Questions]**
+**[Interview Questions]**
 
-      - A collection of common technical interview questions.
+- A collection of common technical interview questions.
 
-      **[Algorithms Reimplementation]**
+**[Algorithms Reimplementation]**
 
-      - Reimplementations of key algorithms such as Canny, ResNet, ROIPooling, RANSAC, CBAM, and Generalized Hough Transform.
+- Reimplementations of key algorithms such as Canny, ResNet, ROIPooling, RANSAC, CBAM, and Generalized Hough Transform.
 
-      **[HuggingFace Related]**
+**[HuggingFace Related]**
 
-      - Usage and integration with HuggingFace libraries.
+- Usage and integration with HuggingFace libraries.
 
-      **[Latex]**
+**[Latex]**
 
-      - Tips and tricks for using LaTeX.
+- Tips and tricks for using LaTeX.
 
-      **[Others]**
+**[Others]**
 
-      - Miscellaneous resources and utilities not covered by the above categories.
+- Miscellaneous resources and utilities not covered by the above categories.
 
 ### ⚠️ Declaration of Original Contributions
 
