@@ -71,24 +71,29 @@ BN层的具体操作有两部分：
 
 这里在某个单类别检测数据集上实验(其他数据集同理)。
 
-### 首先使用train.py进行正常训练:
+### 首先使用train-normal.py进行正常训练:
 
 ```python
 from ultralytics import YOLO
 
 model = YOLO("weights/yolov8s.pt")
 # L1正则的惩罚项系数sr=0
-model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, sr=0)
+model.train(
+    sr=0,
+    data="ultralytics/cfg/datasets/coco.yaml", 
+    epochs=200, 
+    project='.', 
+    name='runs/train-norm', 
+    batch=48, 
+    device=0
+)
 ```
 
-需要下载好权重文件放在train.py同级目录的weights文件夹下;
+需要下载好权重文件放在train-normal.py同级目录的weights文件夹下;
 
 配置好datasets的yaml文件,  配置方式参考YOLOv8官方代码: ultralytics/cfg/datasets/coco128.yaml;
 
 指定训练代数, 制定sr=0(L1正则项惩罚系数为0)
-
-普通训练训练好的权重文件会在工程根目录的runs文件夹下,  将产生的best.pt文件复制到weights文件夹下, 这里复制过去后改名为"person_200eopch_best.pt"
-
 
 
 ### 然后使用train_sparsity.py稀疏训练：
@@ -96,24 +101,34 @@ model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, sr=0)
 ```python
 from ultralytics import YOLO
 
-model = YOLO("weights/person_200eopch_best.pt")
-# L1正则的惩罚项系数sr=0.02
-model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=100, sr=0.02)
+model = YOLO("runs/train-norm/weights/best.pt")
+# L1正则的惩罚项系数sr
+model.train(
+    sr=1e-2, 
+    lr0=1e-3,
+    data="ultralytics/cfg/datasets/coco.yaml", 
+    epochs=50, 
+    patience=50, 
+    project='.', 
+    name='runs/train-sparsity', 
+    batch=48, 
+    device=0
+)
 ```
 
 这里要指定sr的值, 因为要进行稀疏训练, 所以惩罚项一定要有值; 该值越大, 惩罚力度越大, BN层的gamma值的稀疏度就越高
 
-稀疏训练训练好的权重文件会在工程根目录的runs文件夹下,  将产生的best.pt文件复制到weights文件夹下, 这里复制过去后改名为"person_100epoch_best_sparsity.pt"
-
-
+## 使用vis-bn-weight.py可以查看一下, 稀疏前后bn层gamma值的分布变化, 可以明显看到等于0的gamma值在变多
+![](assets/dist-norm.jpg)
+![](assets/dist-sparse.png)
 
 ### 训练完成后使用prune.py进行剪枝, 代码详见prune.py:
 
 ```python
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, default=ROOT / 'ultralytics/cfg/datasets/persons.yaml', help='dataset.yaml path')
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'weights/person_100epoch_best_sparsity.pt', help='model.pt path(s)')
+    parser.add_argument('--data', type=str, default=ROOT / 'ultralytics/cfg/datasets/coco.yaml', help='dataset.yaml path')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train-sparsity/weights/last.pt', help='model.pt path(s)')
     parser.add_argument('--cfg', type=str, default=ROOT / 'ultralytics/cfg/models/v8/yolov8.yaml', help='model.yaml path')
     parser.add_argument('--model-size', type=str, default='s', help='(yolov8)n, s, m, l or x?')
     parser.add_argument('--prune-ratio', type=float, default=0.7, help='prune ratio')
@@ -135,7 +150,7 @@ from ultralytics import YOLO
 
 model = YOLO("weights/pruned.pt")
 # finetune设置为True
-model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, finetune=True)
+model.train(data="ultralytics/cfg/datasets/coco.yaml", epochs=200, finetune=True)
 ```
 
 这里设置好微调的轮数, 一定要制定finetune=True
@@ -146,6 +161,12 @@ model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, finetune=T
 
 ### 使用val.py进行验证, 使用export.py导出为onnx......
 
+## 注意事项
+稀疏训练时需禁用amp, 禁用scaler, 禁用grad_clip_norm
+想要看到所有针对源码的更改代码, 在该工程下全局搜索'===========', 所有的代码改动前后均使用'==========='包覆
+
+## TODO
+多卡DDP模式下, 稀疏训练无法产生稀疏效果
 
 
 ## 剪枝结果比较:

@@ -10,6 +10,7 @@ ultralytics/nn/tasks_pruend.py: 新增DetectionModelPruned, parse_model_pruned
 import re
 import os
 import sys
+import warnings
 from pathlib import Path
 
 import yaml
@@ -25,6 +26,8 @@ from ultralytics.nn.modules import Conv, Concat
 from ultralytics.nn.modules.block_pruned import C2fPruned, SPPFPruned
 from ultralytics.nn.modules.head_pruned import DetectPruned
 from ultralytics.nn.tasks_pruned import DetectionModelPruned
+
+warnings.filterwarnings('ignore')
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -92,8 +95,11 @@ def main(opt):
     percent_limit = (sorted_bn == highest_thre).nonzero()[0, 0].item() / len(sorted_bn)
     # 计算按照当前用户指定比率剪枝下的阈值
     thre = sorted_bn[int(len(sorted_bn) * prune_ratio)]
-    print(f'Suggested Gamma threshold should be less than {colorstr(f"{highest_thre:.4f}")}, yours is {colorstr(f"{thre:.4f}")}')
-    print(f'The corresponding prune ratio should be less than {colorstr(f"{percent_limit:.3f}")}, yours is {colorstr(f"{prune_ratio:.3f}")}')
+    print(f'Pruning gamma values should be less than {colorstr(f"{highest_thre:.4f}")}, yours is {colorstr(f"{thre:.4f}")}')
+    print(f'The corresponding pruing ratio should be less than {colorstr(f"{percent_limit:.3f}")}, yours is {colorstr(f"{prune_ratio:.3f}")}')
+    if prune_ratio > percent_limit:
+        prune_ratio = percent_limit
+        print(f'Pruing ratio falling down to {colorstr(f"{prune_ratio:.3f}")}')
     # ========================================step6=========================================
     """将模型配置文件重新保存为一个字典(注意, 这里重写了C2f模块、SPPF模块和Detect模块)"""
     pruned_yaml = {}
@@ -284,11 +290,11 @@ def main(opt):
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, default=ROOT / 'ultralytics/cfg/datasets/persons.yaml', help='dataset.yaml path')
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'weights/person_100epoch_best_sparsity.pt', help='model.pt path(s)')
+    parser.add_argument('--data', type=str, default=ROOT / 'ultralytics/cfg/datasets/coco.yaml', help='dataset.yaml path')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train-sparsity/weights/last.pt', help='model.pt path(s)')
     parser.add_argument('--cfg', type=str, default=ROOT / 'ultralytics/cfg/models/v8/yolov8.yaml', help='model.yaml path')
     parser.add_argument('--model-size', type=str, default='s', help='(yolov8)n, s, m, l or x?')
-    parser.add_argument('--prune-ratio', type=float, default=0.7, help='prune ratio')
+    parser.add_argument('--prune-ratio', type=float, default=0.5, help='prune ratio')
     parser.add_argument('--save-dir', type=str, default=ROOT / 'weights', help='pruned model weight save dir')
     opt = parser.parse_args()
     return opt

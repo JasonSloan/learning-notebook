@@ -69,8 +69,20 @@ def on_fit_epoch_end(trainer):
     _log_scalars(trainer.metrics, trainer.epoch + 1)
 
 
+# ========================= show bn weights callback function implementation =========================
+def on_show_bn_weights(trainer):
+    if WRITER:
+        WRITER.add_histogram('bn_weights/hist', trainer.bn_weights.numpy(), trainer.epoch, bins='doane')
+# ========================= show bn weights callback function implementation =========================
+
+
 callbacks = {
     'on_pretrain_routine_start': on_pretrain_routine_start,
     'on_train_start': on_train_start,
     'on_fit_epoch_end': on_fit_epoch_end,
-    'on_train_epoch_end': on_train_epoch_end} if SummaryWriter else {}
+    'on_train_epoch_end': on_train_epoch_end,
+    "on_train_epoch_end": on_train_epoch_end,
+    # ================ register function of showing bn weights ================ 
+    "on_show_bn_weights": on_show_bn_weights
+    # ================ register function of showing bn weights ================
+} if SummaryWriter else {}

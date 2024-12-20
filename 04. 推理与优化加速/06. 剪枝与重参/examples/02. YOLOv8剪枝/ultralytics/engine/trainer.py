@@ -239,9 +239,10 @@ class BaseTrainer:
                 v.requires_grad = True
 
         # Check AMP
-        # ====================================================================
-        self.args.amp = False
-        # ====================================================================
+        # ================= disable amp for sparsity training =================
+        if self.sr:
+            self.args.amp = False
+        # ================= disable amp for sparsity training =================
         self.amp = torch.tensor(self.args.amp).to(self.device)  # True or False
         if self.amp and RANK in (-1, 0):  # Single-GPU and DDP
             callbacks_backup = callbacks.default_callbacks.copy()  # backup callbacks as check_amp() resets them
@@ -354,13 +355,18 @@ class BaseTrainer:
                         else self.loss_items
                 
                 # Backward
-                self.scaler.scale(self.loss).backward()
+                # ============================= disable scaler ==========================
+                if self.sr:
+                    self.loss.backward()
+                # ============================= disable scaler ==========================
+                else:
+                    self.scaler.scale(self.loss).backward()
                 
                 # ============================= sparsity training ========================== 
+                ignore_bn_list = []
                 if self.sr is not None:
                     # 不加L1正则的bn层为: 所有C2f模块中的第一个卷积层的bn层, 以及C2f模块中的BottleNeck模块中的第二个卷积层
                     srtmp = self.sr * (1 - 0.9 * self.epoch / self.epochs)  # 线性衰减的L1正则化系数
-                    ignore_bn_list = []
                     for k, m in self.model.named_modules():
                         if isinstance(m, Bottleneck):
                             if m.add:               # 只有Bottleneck模块(对应于网络结构图中的Res Unit)中才做add操作, 所以不能剪
@@ -398,6 +404,23 @@ class BaseTrainer:
                         self.plot_training_samples(batch, ni)
 
                 self.run_callbacks('on_train_batch_end')
+                
+            # ============================= show bn weights in tensorboard ==========================
+            module_list = []
+            for i, layer in self.model.named_modules():
+                if isinstance(layer, nn.BatchNorm2d) and i not in ignore_bn_list:
+                    bnw = layer.state_dict()['weight']
+                    module_list.append(bnw)
+            size_list = [idx.data.shape[0] for idx in module_list]
+
+            self.bn_weights = torch.zeros(sum(size_list))
+            index = 0
+            for idx, size in enumerate(size_list):
+                self.bn_weights[index:(index + size)] = module_list[idx].data.abs().clone()
+                index += size
+            
+            self.run_callbacks("on_show_bn_weights")
+            # ============================= show bn weights in tensorboard ==========================
 
             self.lr = {f'lr/pg{ir}': x['lr'] for ir, x in enumerate(self.optimizer.param_groups)}  # for loggers
             self.run_callbacks('on_train_epoch_end')
@@ -504,11 +527,17 @@ class BaseTrainer:
 
     def optimizer_step(self):
         """Perform a single step of the training optimizer with gradient clipping and EMA update."""
-        self.scaler.unscale_(self.optimizer)  # unscale gradients
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.0)  # clip gradients
-        self.scaler.step(self.optimizer)
-        self.scaler.update()
-        self.optimizer.zero_grad()
+        # ============================= disable scaler/grad clip =============================
+        if self.sr:
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+        # ============================= disable scaler/grad clip =============================
+        else:
+            self.scaler.unscale_(self.optimizer)  # unscale gradients
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.0)  # clip gradients
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
+            self.optimizer.zero_grad()
         if self.ema:
             self.ema.update(self.model)
 

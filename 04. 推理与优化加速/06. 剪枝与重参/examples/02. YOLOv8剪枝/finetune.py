@@ -9,4 +9,9 @@ weight = "weights/pruned.pt"
 
 model = YOLO(weight)
 # finetune设置为True
-model.train(data="ultralytics/cfg/datasets/persons.yaml", epochs=200, finetune=True)
+model.train(
+    data="ultralytics/cfg/datasets/coco.yaml", 
+    epochs=200, 
+    finetune=True, 
+    device=0
+)
