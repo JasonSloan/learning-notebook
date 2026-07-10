@@ -120,7 +120,7 @@ This repository includes original algorithms and methods developed exclusively b
 
 - [x] YOlOv11-pruning
 - [x] C++ code implementation of SGBM
-- [ ] Further study of Reinforcement Learning
+- [x] Further study of Reinforcement Learning
 - [x] C++ version of YOLO-pose inference code uploading
 - [x] RTMPose inference code uploading
-- [ ] Further study of LLM
+- [x] Further study of LLM
