@@ -1,3 +1,12 @@
+# 0. 国内git clone加速方法
+```
+# 在要clone的地址前加
+https://ghfast.top/
+# 比如:
+git clone https://github.com/JasonSloan/DeepFusion
+# 变为: 
+git clone https://ghfast.top/https://github.com/JasonSloan/DeepFusion
+```
 # 一. 常用命令
 
 ```bash
@@ -84,23 +93,6 @@ git push --set-upstream origin mybranch 	# 推送已commit到本地仓库的代�
 9. copy id_rsa.pub to New SSH key -> key -> Title (write by your self)
 10. 点击 Add SSH key
 11. 测试： git clone ***.git
-```
-
-# 四. pycharm导入正在开发的项目
-
-```python
-step1: 在github上：
-    右上角有个+号，点下拉箭头，点击Import Repository，导入成功，复制仓库地址
-step2: 在本地：
-    打开要存放代码的文件夹，然后右键选git bash here，然后git clone + 仓库地址（上一步已导入到自己仓库的地址）
-    使用git clone比使用download zip的好处是在pycharm上可以知道自己改动了代码的哪一部分（改动的会变蓝，增加的会变绿）
-step3: 在pycharm上
-    进入pycharm，打开项目文件夹，在pycharm右下角点击master，选择Remote Branches中的Original/master，选择checkout
-    点击pycharm中右下角的master，选择Checkout Tag or Revision，选择最新的7.0版本
-    点击左下角的git，切换到log界面中，可以看到开发过程中代码的git树状图，点击右下角，选择New Branch新建一个本地分支取好名字，然后点击右下角，点击取好名字的那个分支，点击push，将本地新建的分支push到远程仓库，选择使用token的方式验证比较快。此时在git bash软件中，输入回车可以看到自己在取好名字的分支上。
-step4: 如果本地修改或新增了代码，如何push到远程仓库
-    在pycharm左侧有commit，选中修改的文件，添加说明，commit就可以了，也可以点commit and push直接推到远程仓库中，此时在远程仓库中刷新就可以看到修改的文件了。
-    另外，在pycharm中左侧的commit，双击修改的文件，可以看到对比，左侧为远程仓库的文件，右侧为本地修改的文件，可以对比变化。而且，在右侧本地文件可以选择行号，然后commit and push，也就是不push整个文件，而是push文件中的部分代码。
 ```
 
 # 五. git diff
