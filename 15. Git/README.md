@@ -84,9 +84,9 @@ git push --set-upstream origin mybranch 	# 推送已commit到本地仓库的代�
 ```python
 1. 安装git： sudo apt-get install –y git
 2. 配置git1：git config –global user.name usrname
-3. git config –global user.email youremail
-4. git config –list #查看配置
-5. 配置ssh： ssh-keygen –t ras –C “youremail.163.com”#生成ssh密钥
+3. git config --global user.email youremail
+4. git config --list #查看配置
+5. 配置ssh： ssh-keygen -t rsa -C “youremail.163.com”#生成ssh密钥
 6. cat ~/.ssh/id_rsa.pub
 7. github 上配置ssh
 8. https://github.com/ -> settings -> SSH ang GPS keys -> New SSH key
